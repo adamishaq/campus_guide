@@ -1,4 +1,4 @@
-package uk.ac.ic.doc;
+package uk.ac.ic.doc.campusProject.wicket;
 
 import org.apache.wicket.util.time.Duration;
 import org.eclipse.jetty.http.ssl.SslContextFactory;

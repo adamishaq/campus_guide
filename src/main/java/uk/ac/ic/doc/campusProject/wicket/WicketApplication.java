@@ -1,4 +1,4 @@
-package uk.ac.ic.doc;
+package uk.ac.ic.doc.campusProject.wicket;
 
 import org.apache.wicket.protocol.http.WebApplication;
 
@@ -7,25 +7,16 @@ import org.apache.wicket.protocol.http.WebApplication;
  * 
  * @see uk.ac.ic.doc.Start#main(String[])
  */
-public class WicketApplication extends WebApplication
-{    	
-	/**
-	 * @see org.apache.wicket.Application#getHomePage()
-	 */
+public class WicketApplication extends WebApplication { 
+	
+	
 	@Override
-	public Class<HomePage> getHomePage()
-	{
+	public Class<HomePage> getHomePage() {
 		return HomePage.class;
 	}
-
-	/**
-	 * @see org.apache.wicket.Application#init()
-	 */
+	
 	@Override
-	public void init()
-	{
+	public void init() {
 		super.init();
-
-		// add your configuration here
 	}
 }
