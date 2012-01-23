@@ -1,6 +1,8 @@
-package uk.ac.ic.doc.campusProject.wicket;
+package uk.ac.ic.doc.campusProject.web;
 
 import org.apache.wicket.protocol.http.WebApplication;
+
+import uk.ac.ic.doc.campusProject.web.pages.HomePage;
 
 /**
  * Application object for your web application. If you want to run this application without deploying, run the Start class.

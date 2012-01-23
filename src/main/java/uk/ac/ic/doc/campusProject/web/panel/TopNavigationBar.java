@@ -1,4 +1,4 @@
-package uk.ac.ic.doc.campusProject.wicket.navigation;
+package uk.ac.ic.doc.campusProject.web.panel;
 
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.border.Border;

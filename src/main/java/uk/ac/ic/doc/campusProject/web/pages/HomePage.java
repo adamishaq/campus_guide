@@ -1,4 +1,4 @@
-package uk.ac.ic.doc.campusProject.wicket;
+package uk.ac.ic.doc.campusProject.web.pages;
 
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 

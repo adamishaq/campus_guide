@@ -1,8 +1,11 @@
-package uk.ac.ic.doc.campusProject.wicket;
+package uk.ac.ic.doc.campusProject.web;
 
 import org.apache.wicket.util.tester.WicketTester;
 import org.junit.Before;
 import org.junit.Test;
+
+import uk.ac.ic.doc.campusProject.web.WicketApplication;
+import uk.ac.ic.doc.campusProject.web.pages.HomePage;
 
 /**
  * Simple test using the WicketTester
