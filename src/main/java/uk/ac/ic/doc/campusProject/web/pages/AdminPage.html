@@ -1,9 +1,23 @@
 <html>
     <head>
         <link rel="stylesheet" type="text/css" href="style.css"/>
+        <title wicket:id="title">Title</title>
     </head>
     <body>
-        <span wicket:id="navBar"></span> 
-        <wicket:child/>
+        <span wicket:id="navBar"/>
+        <table width="40%">
+            <tr>
+                <td>
+                    <ul>
+                        Current Location: <b wicket:id="location">location</b>
+                        <li><a href="#" wicket:id="home">Home</a></li>
+                        <li><a href="#" wicket:id="mapping">Mapping</a></li>
+                    </ul>
+                </td>
+                <td>
+                    <wicket:child/>
+                </td>
+            </tr>
+        </table>
     </body>
 </html>

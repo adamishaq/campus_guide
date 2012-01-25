@@ -6,6 +6,6 @@ public class HomePage extends AdminPage {
 	private static final long serialVersionUID = 1L;
 
     public HomePage(final PageParameters parameters) {
-    	super("Home");
+    	setPageLocation("Home");
     }
 }

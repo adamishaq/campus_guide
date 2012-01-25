@@ -1,0 +1,31 @@
+<wicket:extend>
+    <div wicket:id="feedback"></div>
+    <form wicket:id="uploadForm">
+        <p>
+            Select file: <input wicket:id="fileUpload" size="40" type="file" />
+            <input type="submit" value="Upload" />
+        </p>
+    </form>
+    <form wicket:id="editForm">
+            <table border="1">
+                <tr>
+                    <td><b>Map Thumbnail</b></td>
+                    <td><b>Building Name</b></td>
+                    <td><b>Floor</b></td>
+                </tr>
+                <span wicket:id="uploadedImages">
+                <tr>
+                    <td>
+                        <img wicket:id="preview" />
+                    </td>
+                    <td>
+                        <input wicket:id="building" type="text" size="20" />
+                    </td>
+                    <td>
+                        <input wicket:id="floor" type="text" size="20" />
+                    </td>
+                </tr>
+                </span>
+            </table>
+    </form>
+</wicket:extend>
