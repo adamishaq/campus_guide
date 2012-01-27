@@ -14,21 +14,22 @@ import org.apache.log4j.Logger;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 
+import uk.ac.ic.doc.campusProject.model.FloorPlanDao;
 import uk.ac.ic.doc.campusProject.model.SerializableBufferedImage;
 
 public class PdfProcessor implements Serializable {
 	private static final long serialVersionUID = 1L;
 	static Logger log = Logger.getLogger(PdfProcessor.class);
 	
-	public static List<SerializableBufferedImage> pdfToImage (InputStream fileInputStream) {
-		List<SerializableBufferedImage> images = new ArrayList<SerializableBufferedImage>();
+	public static List<FloorPlanDao> pdfToImage (InputStream fileInputStream) {
+		List<FloorPlanDao> images = new ArrayList<FloorPlanDao>();
 	    try {
 		    PDDocument doc = PDDocument.load(fileInputStream);
 			@SuppressWarnings("unchecked")
 			List<PDPage> pages = doc.getDocumentCatalog().getAllPages();
 			for (PDPage page : pages) {
 				SerializableBufferedImage image = new SerializableBufferedImage(page.convertToImage());
-				images.add(image);
+				images.add(new FloorPlanDao(image, "", ""));
 			}
 			//writeImagesToDisk(images);
 			return images;  

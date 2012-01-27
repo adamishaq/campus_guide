@@ -13,10 +13,11 @@ import org.apache.wicket.markup.html.image.Image;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.FeedbackPanel;
+import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.resource.DynamicImageResource;
 import org.apache.wicket.util.lang.Bytes;
 
-import uk.ac.ic.doc.campusProject.model.SerializableBufferedImage;
+import uk.ac.ic.doc.campusProject.model.FloorPlanDao;
 import uk.ac.ic.doc.campusProject.utils.pdf.PdfProcessor;
 import uk.ac.ic.doc.campusProject.web.pages.AdminPage;
 
@@ -25,10 +26,10 @@ public class MapUploadPage extends AdminPage {
     
 	private static final long serialVersionUID = 1L;
 	private FileUploadField fileUpload;
-	private List<SerializableBufferedImage> images; 
+	private List<FloorPlanDao> images; 
 
 	
-	public MapUploadPage(List<SerializableBufferedImage> images) {
+	public MapUploadPage(List<FloorPlanDao> images) {
 		setPageLocation("Mapping - Upload new Maps");
 		this.images = images;
 		
@@ -63,27 +64,34 @@ public class MapUploadPage extends AdminPage {
 	
 	class EditForm extends Form<Void> {
 		private static final long serialVersionUID = 1L;
+		private ListView<FloorPlanDao> uploadedImages;
 
 		public EditForm() {
 			super("editForm");
-			ListView<SerializableBufferedImage> uploadedImages = new ListView<SerializableBufferedImage>("uploadedImages", images) {
+			uploadedImages = new ListView<FloorPlanDao>("uploadedImages", images) {
 				private static final long serialVersionUID = 1L;
 
-				protected void populateItem(final ListItem<SerializableBufferedImage> item) {
+				protected void populateItem(final ListItem<FloorPlanDao> item) {
 					item.add(new Image("preview", new DynamicImageResource() {
 						private static final long serialVersionUID = 1L;
 
 						@Override
 						protected byte[] getImageData(Attributes attributes) {
-							return item.getModel().getObject().getThumb();
+							return item.getModel().getObject().getFloorPlan().getThumb();
 						}
 					}));
-					item.add(new TextField<String>("building"));
-					item.add(new TextField<String>("floor"));
-
+					item.add(new TextField<String>("building", new PropertyModel<String>(item.getModel().getObject(), "building")));
+					item.add(new TextField<String>("floor", new PropertyModel<String>(item.getModel().getObject(), "floor")));
 				}
 			};
 			add(uploadedImages);
+		}
+		
+		@Override
+		protected void onSubmit() {
+			
+			//VALIDATION CODE
+
 		}
 		
 	}
