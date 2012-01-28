@@ -89,8 +89,19 @@ public class MapUploadPage extends AdminPage {
 		
 		@Override
 		protected void onSubmit() {
-			
-			//VALIDATION CODE
+			for (int x = 0 ; x < images.size(); x++) {
+				FloorPlanDao currentFloor = images.get(x);
+				if (currentFloor == null) {
+					error("BEEF!");
+				}
+				else if (currentFloor.getBuilding() == null || currentFloor.getFloor() == null) {
+					error("You have not specified a building name or floor number for map: " +  (x + 1));
+				} 
+				else {
+					// TODO: COMMIT TO DATABASE
+					// TODO: MOVE USER ONTO MAP TAGGING
+				}
+			}
 
 		}
 		
@@ -120,10 +131,10 @@ public class MapUploadPage extends AdminPage {
 				}
 			}
 			else if (uploadedFile != null && !uploadedFile.getContentType().equals("application/pdf")) {
-				info("You must upload a PDF file");
+				error("You must upload a PDF file");
 			}
 			else {
-				info("Please select a file to upload");
+				error("Please select a file to upload");
 			}
 			
 		}

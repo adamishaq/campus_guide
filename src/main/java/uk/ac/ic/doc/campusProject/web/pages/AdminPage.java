@@ -12,12 +12,10 @@ public abstract class AdminPage extends WebPage {
 	private static final long serialVersionUID = 1L;
 	
 	private String pageLocation = "Home";
-	private TopNavigationBar navBar; 
-
 	public AdminPage() {
 		add(new Label("title", new PropertyModel<String>(this, "pageLocation")));
 		add(new Label("location", new PropertyModel<String>(this, "pageLocation")));
-		add(navBar = new TopNavigationBar("navBar"));
+		add(new TopNavigationBar("navBar"));
 		add(new BookmarkablePageLink<Void>("home", HomePage.class));
 		add(new BookmarkablePageLink<Void>("mapping", MappingLandingPage.class));
 	}
