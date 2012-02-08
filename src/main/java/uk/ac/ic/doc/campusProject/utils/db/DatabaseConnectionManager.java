@@ -24,7 +24,9 @@ public class DatabaseConnectionManager {
 		try {
 			if (type.equals("live")) {
 				conn = DriverManager.getConnection(prop.getProperty("admindb.live.connecturi"), prop.getProperty("admindb.live.user"), prop.getProperty("admindb.live.pass"));
-			} else if (type.equals("dev")) {
+			} 
+			else if (type.equals("dev")) {
+				log.info("Have connection");
 				conn = DriverManager.getConnection(prop.getProperty("admindb.dev.connecturi"), prop.getProperty("admindb.dev.user"), prop.getProperty("admindb.dev.pass"));
 			}
 			return conn;

@@ -2,6 +2,10 @@ package uk.ac.ic.doc.campusProject.web.pages.mapping;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.List;
 
 import org.apache.log4j.Logger;
@@ -18,6 +22,7 @@ import org.apache.wicket.request.resource.DynamicImageResource;
 import org.apache.wicket.util.lang.Bytes;
 
 import uk.ac.ic.doc.campusProject.model.FloorPlanDao;
+import uk.ac.ic.doc.campusProject.utils.db.DatabaseConnectionManager;
 import uk.ac.ic.doc.campusProject.utils.pdf.PdfProcessor;
 import uk.ac.ic.doc.campusProject.web.pages.AdminPage;
 
@@ -98,8 +103,18 @@ public class MapUploadPage extends AdminPage {
 					error("You have not specified a building name or floor number for map: " +  (x + 1));
 				} 
 				else {
-					// TODO: COMMIT TO DATABASE
-					// TODO: MOVE USER ONTO MAP TAGGING
+					Connection conn = DatabaseConnectionManager.getConnection("dev");
+					try {
+						PreparedStatement stmt = conn.prepareStatement("INSERT INTO public.\"Floor\" VALUES(?, ?, ?)");
+						stmt.setInt(1, new Integer(currentFloor.getFloor()));
+						stmt.setString(2, currentFloor.getBuilding());
+						stmt.setBytes(3, currentFloor.getFloorPlan().getImage());
+						stmt.execute();
+						conn.close();
+					} 
+					catch (SQLException e) {
+						log.error(e);
+					}
 				}
 			}
 

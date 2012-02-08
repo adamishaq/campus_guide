@@ -31,9 +31,10 @@ SET default_with_oids = false;
 --
 -- Name: Building; Type: TABLE; Schema: public; Owner: admin; Tablespace: 
 --
+DROP TABLE "Building" CASCADE;
 
 CREATE TABLE "Building" (
-    "Name" character varying(128)[] NOT NULL,
+    "Name" character varying(128) NOT NULL,
     "Floors" numeric NOT NULL
 );
 
@@ -44,10 +45,12 @@ ALTER TABLE public."Building" OWNER TO admin;
 -- Name: Floor; Type: TABLE; Schema: public; Owner: admin; Tablespace: 
 --
 
+DROP TABLE "Floor" CASCADE;
+
 CREATE TABLE "Floor" (
     "Floor" numeric NOT NULL,
-    "Building" character varying(256)[] NOT NULL,
-    "Plan" bytea[] NOT NULL
+    "Building" character varying(256) NOT NULL,
+    "Plan" bytea NOT NULL
 );
 
 
@@ -57,8 +60,10 @@ ALTER TABLE public."Floor" OWNER TO admin;
 -- Name: Floor_Contains; Type: TABLE; Schema: public; Owner: admin; Tablespace: 
 --
 
+DROP TABLE "Floor_Contains" CASCADE;
+
 CREATE TABLE "Floor_Contains" (
-    "Building" character varying(256)[] NOT NULL,
+    "Building" character varying(256) NOT NULL,
     "Floor" numeric NOT NULL,
     "Room" numeric NOT NULL
 );
@@ -70,8 +75,10 @@ ALTER TABLE public."Floor_Contains" OWNER TO admin;
 -- Name: Lift; Type: TABLE; Schema: public; Owner: admin; Tablespace: 
 --
 
+DROP TABLE "Lift" CASCADE;
+
 CREATE TABLE "Lift" (
-    "Building" character varying(256)[] NOT NULL,
+    "Building" character varying(256) NOT NULL,
     "ID" numeric NOT NULL
 );
 
@@ -82,8 +89,10 @@ ALTER TABLE public."Lift" OWNER TO admin;
 -- Name: Lift_Link; Type: TABLE; Schema: public; Owner: admin; Tablespace: 
 --
 
+DROP TABLE "Lift_Link" CASCADE;
+
 CREATE TABLE "Lift_Link" (
-    "Building" character varying(256)[] NOT NULL,
+    "Building" character varying(256) NOT NULL,
     "Lift_ID" numeric NOT NULL,
     "Floor" numeric NOT NULL
 );
@@ -95,9 +104,11 @@ ALTER TABLE public."Lift_Link" OWNER TO admin;
 -- Name: Room; Type: TABLE; Schema: public; Owner: admin; Tablespace: 
 --
 
+DROP TABLE "Room" CASCADE;
+
 CREATE TABLE "Room" (
     "Number" numeric NOT NULL,
-    "Building" character varying(256)[] NOT NULL
+    "Building" character varying(256) NOT NULL
 );
 
 
@@ -107,8 +118,10 @@ ALTER TABLE public."Room" OWNER TO admin;
 -- Name: Staircase; Type: TABLE; Schema: public; Owner: admin; Tablespace: 
 --
 
+DROP TABLE "Staircase" CASCADE;
+
 CREATE TABLE "Staircase" (
-    "Building" character varying(256)[] NOT NULL,
+    "Building" character varying(256) NOT NULL,
     "ID" numeric NOT NULL
 );
 
@@ -119,8 +132,10 @@ ALTER TABLE public."Staircase" OWNER TO admin;
 -- Name: Stairs_Link; Type: TABLE; Schema: public; Owner: admin; Tablespace: 
 --
 
+DROP TABLE "Stairs_Link" CASCADE;
+
 CREATE TABLE "Stairs_Link" (
-    "Building" character varying(256)[] NOT NULL,
+    "Building" character varying(256) NOT NULL,
     "Stairs_ID" numeric NOT NULL,
     "Floor" numeric NOT NULL
 );
