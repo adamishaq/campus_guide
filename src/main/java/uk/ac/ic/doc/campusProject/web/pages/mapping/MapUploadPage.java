@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.List;
 
 import org.apache.log4j.Logger;
@@ -103,14 +102,16 @@ public class MapUploadPage extends AdminPage {
 					error("You have not specified a building name or floor number for map: " +  (x + 1));
 				} 
 				else {
-					Connection conn = DatabaseConnectionManager.getConnection("dev");
+					Connection conn = DatabaseConnectionManager.getConnection("live");
 					try {
-						PreparedStatement stmt = conn.prepareStatement("INSERT INTO public.\"Floor\" VALUES(?, ?, ?)");
+						PreparedStatement stmt = conn.prepareStatement("INSERT INTO Floor VALUES(?, ?, ?) ON DUPLICATE KEY UPDATE Plan=?");
 						stmt.setInt(1, new Integer(currentFloor.getFloor()));
 						stmt.setString(2, currentFloor.getBuilding());
 						stmt.setBytes(3, currentFloor.getFloorPlan().getImage());
+						stmt.setBytes(4, currentFloor.getFloorPlan().getImage());
 						stmt.execute();
 						conn.close();
+						setResponsePage(new MapGeoTagPage(images));
 					} 
 					catch (SQLException e) {
 						log.error(e);

@@ -29,4 +29,16 @@
 		<filter-name>wicket.campus_guide</filter-name>
 		<url-pattern>/*</url-pattern>
 	</filter-mapping>
+	
+	<servlet>
+		<servlet-name>mapping</servlet-name>
+		<servlet-class>uk.ac.ic.doc.campusProject.web.servlet.MappingApi</servlet-class>
+	</servlet>
+	
+	<servlet-mapping>
+		<servlet-name>mapping</servlet-name>
+		<url-pattern>/api</url-pattern>
+	</servlet-mapping>
+	
+	
 </web-app>
