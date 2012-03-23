@@ -22,51 +22,19 @@ public class MapGeoTagPage extends WebPage {
 	/* Make extensible - add argumentless constructor for general case */
 	
 	public MapGeoTagPage() {
+		//add(new FeedbackPanel("feedback"));
 		
-		add(new FeedbackPanel("feedback"));
-		
-		final JsPanel panel = new JsPanel("jsPanel");
-		panel.setOutputMarkupId(true);
-		add(panel);
-		
-		final AbstractDefaultAjaxBehavior behave = new AbstractDefaultAjaxBehavior() {
-			private static final long serialVersionUID = 1L;
-
-			@Override
-			protected void respond(AjaxRequestTarget target) {
-				IRequestParameters map = RequestCycle.get().getRequest().getPostParameters();
-			    String longitude = map.getParameterValue("longitude").toString();
-			    log.info(longitude);
-			}
-		};
-	    panel.add(behave);
 	}
-	
-	public MapGeoTagPage(PageParameters params) {
-		log.info("PARAMS EXIST");
-	}
-	
 	
 	public MapGeoTagPage(List<FloorPlanDao> floorPlanDao) {
 		this.floorPlans = floorPlanDao;
 		
-		add(new FeedbackPanel("feedback"));
+		//add(new FeedbackPanel("feedback"));
 		
-		final JsPanel panel = new JsPanel("jsPanel");
-		panel.setOutputMarkupId(true);
-		add(panel);
-		
-		final AbstractDefaultAjaxBehavior behave = new AbstractDefaultAjaxBehavior() {
-			private static final long serialVersionUID = 1L;
-
-			@Override
-			protected void respond(AjaxRequestTarget target) {
-				IRequestParameters map = RequestCycle.get().getRequest().getPostParameters();
-			    String longitude = map.getParameterValue("longitude").toString();
-			    log.info(longitude);
-			}
-		};
-	    panel.add(behave);
+	}
+	
+	public MapGeoTagPage(PageParameters pp) {
+		log.info("pp here!");
 	}
 	
 	
