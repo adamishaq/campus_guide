@@ -86,7 +86,7 @@ public class MappingApi extends HttpServlet {
 				AccessPoint verifiedLocation = verifyLocation(accessPoints);
 				
 				String building = verifiedLocation.getBuildingFromHostname();
-				int floor = verifiedLocation.getFloorFromHostname();
+				String floor = verifiedLocation.getFloorFromHostname();
 				
 				PreparedStatement stmt = conn.prepareStatement("SELECT * FROM Building LEFT JOIN Building_Map_Attributes ON Name=Building WHERE Building=?");
 				stmt.setString(1, building);
@@ -129,7 +129,8 @@ public class MappingApi extends HttpServlet {
 					os.write(delimiter);
 					os.write(longPixBytes);
 					os.write(delimiter);
-					os.write(floor);
+					byte[] floorArray = floor.getBytes();
+					os.write(floorArray);
 					response.setStatus(HttpServletResponse.SC_OK);
 					os.flush();
 				}
@@ -190,7 +191,7 @@ public class MappingApi extends HttpServlet {
 		 /* Take the floor of the highest strength AP, get the MAC addresses of all other APs on that floor, 
 		  * and determine how many of these other APs are in our list. 
 		  */
-		 Map<Integer, Integer> floorFrequency = new HashMap<Integer, Integer>();
+		 Map<String, Integer> floorFrequency = new HashMap<String, Integer>();
 		 Map<String, Integer> buildingFrequency = new HashMap<String, Integer>();
 		 
 		 
@@ -199,7 +200,7 @@ public class MappingApi extends HttpServlet {
 		 }
 		 else {
 			 for (AccessPoint ap : accessPoints) {
-				 int floor = ap.getFloorFromHostname();
+				 String floor = ap.getFloorFromHostname();
 				 String building = ap.getBuildingFromHostname();
 				 
 				 if (floorFrequency.containsKey(floor)) {
@@ -218,8 +219,8 @@ public class MappingApi extends HttpServlet {
 				 
 			 }
 			 
-			 Map.Entry<Integer, Integer> maxFloor = null;
-			 for (Map.Entry<Integer, Integer> floor : floorFrequency.entrySet()) {
+			 Map.Entry<String, Integer> maxFloor = null;
+			 for (Map.Entry<String, Integer> floor : floorFrequency.entrySet()) {
 				 if (maxFloor == null || floor.getValue().compareTo(maxFloor.getValue()) > 0) {
 					 maxFloor = floor;
 				 }
