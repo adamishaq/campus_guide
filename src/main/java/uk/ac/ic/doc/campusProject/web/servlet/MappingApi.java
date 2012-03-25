@@ -6,6 +6,11 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServlet;
@@ -14,6 +19,8 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.log4j.Logger;
 
+import uk.ac.ic.doc.campusProject.model.AccessPoint;
+import uk.ac.ic.doc.campusProject.utils.comparator.AccessPointComparator;
 import uk.ac.ic.doc.campusProject.utils.db.DatabaseConnectionManager;
 
 public class MappingApi extends HttpServlet {
@@ -27,7 +34,7 @@ public class MappingApi extends HttpServlet {
 		Connection conn = DatabaseConnectionManager.getConnection("live");
 		try {
 			String type = request.getParameter("type");
-			if (type.equals("manual")) {;
+			if (type.equals("manual")) {
 				String building = request.getParameter("building");
 				int floor = new Integer(request.getParameter("floor"));
 	
@@ -53,51 +60,33 @@ public class MappingApi extends HttpServlet {
 			else {
 				double longitude = 0;
 				double latitude = 0;
-				double altitude = 0;
-				String[] mac = new String[5];
-				double[] ss = new double[5];
-				try {
-					longitude = Double.parseDouble(request.getParameter("longitude"));
-					latitude = Double.parseDouble(request.getParameter("latitude"));
-					altitude = Double.parseDouble(request.getParameter("altitude"));
-					for (int x = 0 ; x < 5 ; x++) {
-						String macThis = request.getParameter("mac" + x);
-						String ssThis = request.getParameter("ss" + x);
-						if (macThis != null && ssThis != null) {
-							mac[x] = macThis;
-							double ssDouble = Double.parseDouble(ssThis);
-							ss[x] = ssDouble;
+				List<AccessPoint> accessPoints = new ArrayList<AccessPoint>();
+				longitude = Double.parseDouble(request.getParameter("longitude"));
+				latitude = Double.parseDouble(request.getParameter("latitude"));
+				for (int x = 1 ; x <= 5 ; x++) {
+					AccessPoint ap = null;
+					String macParameter = new String("mac" + x);
+					String ssParameter = new String("ss" + x);
+					String macThis = request.getParameter(macParameter);
+					String ssThis = request.getParameter(ssParameter);
+					if (macThis != null && ssThis != null) {
+						PreparedStatement stmt = conn.prepareStatement("SELECT Hostname FROM WirelessAccessPoints WHERE MAC=?");
+						stmt.setString(1, macThis);
+						if (stmt.execute()) {
+							ResultSet rs = stmt.getResultSet();
+							while(rs.next()) {
+								ap = new AccessPoint(macThis, rs.getString("Hostname"), Double.parseDouble(ssThis));
+								accessPoints.add(ap);
+							}
 						}
 					}
-					
-				} 
-				catch (NullPointerException e) {
-					log.error(e);
-					response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
 				}
-				catch (NumberFormatException e) {
-					log.error(e);
-					response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-				}
-				log.info("---------");
-				log.info(latitude);
-				log.info(longitude);
-				log.info(altitude);
-				log.info(mac.length);
-				log.info(ss.length);
+				Collections.sort(accessPoints, new AccessPointComparator());
+
+				AccessPoint verifiedLocation = verifyLocation(accessPoints);
 				
-				/* Do database query to determine what building we are in, and what floor 
-				 * We will assume Huxley Level 3 
-				 * 
-				 * Get the floor plan, scale and sync coordinates
-				 * 
-				 * Translate gps coordinates to pixel coordinates
-				 * 
-				 * TODO: Once pixel/coordinate values for aps are known, take mac address into account when doing pixel mapping
-				 */
-				
-				String building = "Huxley";
-				//int floor = 2;
+				String building = verifiedLocation.getBuildingFromHostname();
+				int floor = verifiedLocation.getFloorFromHostname();
 				
 				PreparedStatement stmt = conn.prepareStatement("SELECT * FROM Building LEFT JOIN Building_Map_Attributes ON Name=Building WHERE Building=?");
 				stmt.setString(1, building);
@@ -127,17 +116,22 @@ public class MappingApi extends HttpServlet {
 					}
 					/* The magic number - Investigate persisting this value */
 					
-					//double metrePerPixel = coordinateDistance / pixelDistance;
 					double pixelPerMetre = pixelDistance / coordinateDistance;
 					
 					double latPix = x1 + (pixelPerMetre * getMetresFromCoords(lat1, long1, latitude, long1));
+					byte[] latPixBytes = ((Double)latPix).toString().getBytes();
 					double longPix = y1 + (pixelPerMetre * getMetresFromCoords(lat1, long1, lat1, longitude));
+					byte[] longPixBytes = ((Double)longPix).toString().getBytes();
 					
-					log.info("Latitude" + latPix);
-					log.info("Longitude" + longPix);
-					log.info("--------");
-
-
+					ServletOutputStream os = response.getOutputStream();
+					os.write(latPixBytes);
+					byte[] delimiter = new String(", ").getBytes();
+					os.write(delimiter);
+					os.write(longPixBytes);
+					os.write(delimiter);
+					os.write(floor);
+					response.setStatus(HttpServletResponse.SC_OK);
+					os.flush();
 				}
 				
 			}
@@ -150,6 +144,14 @@ public class MappingApi extends HttpServlet {
 		catch (IOException e) {
 			log.error(e);
 			e.printStackTrace();
+		}
+		catch (NullPointerException e) {
+			log.error(e);
+			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+		}
+		catch (NumberFormatException e) {
+			log.error(e);
+			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
 		}
 	}
 	
@@ -182,6 +184,68 @@ public class MappingApi extends HttpServlet {
 		 double dist = EARTHRAD * c;
 
 		 return new Double(dist * METRECONV);
+	 }
+	 
+	 private AccessPoint verifyLocation(List<AccessPoint> accessPoints) {
+		 /* Take the floor of the highest strength AP, get the MAC addresses of all other APs on that floor, 
+		  * and determine how many of these other APs are in our list. 
+		  */
+		 Map<Integer, Integer> floorFrequency = new HashMap<Integer, Integer>();
+		 Map<String, Integer> buildingFrequency = new HashMap<String, Integer>();
+		 
+		 
+		 if (accessPoints.size() == 1) {
+			 return accessPoints.get(0);
+		 }
+		 else {
+			 for (AccessPoint ap : accessPoints) {
+				 int floor = ap.getFloorFromHostname();
+				 String building = ap.getBuildingFromHostname();
+				 
+				 if (floorFrequency.containsKey(floor)) {
+					 floorFrequency.put(floor, floorFrequency.get(floor) + 1);
+				 }
+				 else {
+					 floorFrequency.put(floor, 1);
+				 }
+				 
+				 if (buildingFrequency.containsKey(building)) {
+					 buildingFrequency.put(building, buildingFrequency.get(building) + 1);
+				 }
+				 else {
+					 buildingFrequency.put(building, 1);
+				 }
+				 
+			 }
+			 
+			 Map.Entry<Integer, Integer> maxFloor = null;
+			 for (Map.Entry<Integer, Integer> floor : floorFrequency.entrySet()) {
+				 if (maxFloor == null || floor.getValue().compareTo(maxFloor.getValue()) > 0) {
+					 maxFloor = floor;
+				 }
+			 }
+			 String majorityFloor = new Integer(maxFloor.getKey()).toString();
+			 
+			 Map.Entry<String, Integer> maxBuilding = null;
+			 for (Map.Entry<String, Integer > building : buildingFrequency.entrySet()) {
+				 if (maxBuilding == null || building.getValue().compareTo(maxBuilding.getValue()) > 0) {
+					 maxBuilding = building;
+				 }
+			 }
+			 String majorityBuilding = maxBuilding.getKey();
+			 
+			 
+			 for (AccessPoint ap : accessPoints) {
+				 String[] accessPointDelimiter = ap.getHostname().split("-");
+				 if (accessPointDelimiter[0].equals(majorityBuilding) && accessPointDelimiter[2].equals(majorityFloor)) {
+					 log.info(majorityBuilding);
+					 log.info(majorityFloor);
+					 return ap;
+				 }
+				 
+			 }
+		 }
+		 return null;
 	 }
 
 
