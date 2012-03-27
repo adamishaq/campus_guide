@@ -38,9 +38,10 @@ public class MappingApi extends HttpServlet {
 				String building = request.getParameter("building");
 				int floor = new Integer(request.getParameter("floor"));
 	
-				PreparedStatement stmt = conn.prepareStatement("SELECT Plan FROM Floor WHERE Building=? AND Floor=?");
+				PreparedStatement stmt = conn.prepareStatement("SELECT Plan FROM Floor LEFT JOIN Building ON Building=Name WHERE (Building=? OR ShortCode=?) AND Floor=?");
 				stmt.setString(1, building);
-				stmt.setInt(2, floor);
+				stmt.setString(2, building);
+				stmt.setInt(3, floor);
 				if (stmt.execute()) {
 					ResultSet rs = stmt.getResultSet();
 					while(rs.next()) {
@@ -88,7 +89,7 @@ public class MappingApi extends HttpServlet {
 				String building = verifiedLocation.getBuildingFromHostname();
 				String floor = verifiedLocation.getFloorFromHostname();
 				
-				PreparedStatement stmt = conn.prepareStatement("SELECT * FROM Building LEFT JOIN Building_Map_Attributes ON Name=Building WHERE Building=?");
+				PreparedStatement stmt = conn.prepareStatement("SELECT * FROM Building LEFT JOIN Building_Map_Attributes ON Name=Building WHERE ShortCode=?");
 				stmt.setString(1, building);
 				if (stmt.execute()) {
 					ResultSet rs = stmt.getResultSet();
@@ -122,7 +123,8 @@ public class MappingApi extends HttpServlet {
 					byte[] latPixBytes = ((Double)latPix).toString().getBytes();
 					double longPix = y1 + (pixelPerMetre * getMetresFromCoords(lat1, long1, lat1, longitude));
 					byte[] longPixBytes = ((Double)longPix).toString().getBytes();
-					
+				
+					response.setContentType("text/plain");
 					ServletOutputStream os = response.getOutputStream();
 					os.write(latPixBytes);
 					byte[] delimiter = new String(", ").getBytes();
@@ -131,6 +133,9 @@ public class MappingApi extends HttpServlet {
 					os.write(delimiter);
 					byte[] floorArray = floor.getBytes();
 					os.write(floorArray);
+					byte[] buildingArray = building.getBytes();
+					os.write(delimiter);
+					os.write(buildingArray);
 					response.setStatus(HttpServletResponse.SC_OK);
 					os.flush();
 				}
@@ -191,6 +196,7 @@ public class MappingApi extends HttpServlet {
 		 /* Take the floor of the highest strength AP, get the MAC addresses of all other APs on that floor, 
 		  * and determine how many of these other APs are in our list. 
 		  */
+		 
 		 Map<String, Integer> floorFrequency = new HashMap<String, Integer>();
 		 Map<String, Integer> buildingFrequency = new HashMap<String, Integer>();
 		 
@@ -235,7 +241,6 @@ public class MappingApi extends HttpServlet {
 			 }
 			 String majorityBuilding = maxBuilding.getKey();
 			 
-			 
 			 for (AccessPoint ap : accessPoints) {
 				 String[] accessPointDelimiter = ap.getHostname().split("-");
 				 if (accessPointDelimiter[0].equals(majorityBuilding) && accessPointDelimiter[2].equals(majorityFloor)) {
@@ -248,8 +253,4 @@ public class MappingApi extends HttpServlet {
 		 }
 		 return null;
 	 }
-
-
-	
-
 }
