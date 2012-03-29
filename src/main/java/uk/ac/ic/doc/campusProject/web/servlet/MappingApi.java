@@ -64,7 +64,7 @@ public class MappingApi extends HttpServlet {
 				List<AccessPoint> accessPoints = new ArrayList<AccessPoint>();
 				longitude = Double.parseDouble(request.getParameter("longitude"));
 				latitude = Double.parseDouble(request.getParameter("latitude"));
-				for (int x = 1 ; x <= 5 ; x++) {
+				for (int x = 0 ; x < 25 ; x++) {
 					AccessPoint ap = null;
 					String macParameter = new String("mac" + x);
 					String ssParameter = new String("ss" + x);
@@ -84,10 +84,17 @@ public class MappingApi extends HttpServlet {
 				}
 				Collections.sort(accessPoints, new AccessPointComparator());
 
-				AccessPoint verifiedLocation = verifyLocation(accessPoints);
-				
-				String building = verifiedLocation.getBuildingFromHostname();
-				String floor = verifiedLocation.getFloorFromHostname();
+				String floor, building;
+				AccessPoint verifiedLocation;
+				if (verifyLocation(accessPoints) != null) {
+					verifiedLocation = verifyLocation(accessPoints);
+					building = verifiedLocation.getBuildingFromHostname();
+					floor = verifiedLocation.getFloorFromHostname();
+				}
+				else {
+					building = "hux";
+					floor = "2";
+				}
 				
 				PreparedStatement stmt = conn.prepareStatement("SELECT * FROM Building LEFT JOIN Building_Map_Attributes ON Name=Building WHERE ShortCode=?");
 				stmt.setString(1, building);
@@ -152,7 +159,7 @@ public class MappingApi extends HttpServlet {
 			e.printStackTrace();
 		}
 		catch (NullPointerException e) {
-			log.error(e);
+			e.printStackTrace();
 			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
 		}
 		catch (NumberFormatException e) {
@@ -231,6 +238,9 @@ public class MappingApi extends HttpServlet {
 					 maxFloor = floor;
 				 }
 			 }
+			 if (maxFloor == null) {
+				 return null;
+			 }
 			 String majorityFloor = new Integer(maxFloor.getKey()).toString();
 			 
 			 Map.Entry<String, Integer> maxBuilding = null;
@@ -238,6 +248,9 @@ public class MappingApi extends HttpServlet {
 				 if (maxBuilding == null || building.getValue().compareTo(maxBuilding.getValue()) > 0) {
 					 maxBuilding = building;
 				 }
+			 }
+			 if (maxBuilding == null) {
+				 return null;
 			 }
 			 String majorityBuilding = maxBuilding.getKey();
 			 

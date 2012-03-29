@@ -34,10 +34,19 @@
 		<servlet-name>mapping</servlet-name>
 		<servlet-class>uk.ac.ic.doc.campusProject.web.servlet.MappingApi</servlet-class>
 	</servlet>
+	<servlet>
+		<servlet-name>places</servlet-name>
+		<servlet-class>uk.ac.ic.doc.campusProject.web.servlet.PlacesApi</servlet-class>
+	</servlet>
 	
 	<servlet-mapping>
 		<servlet-name>mapping</servlet-name>
 		<url-pattern>/api</url-pattern>
+	</servlet-mapping>
+	
+	<servlet-mapping>
+		<servlet-name>places</servlet-name>
+		<url-pattern>/api-places</url-pattern>
 	</servlet-mapping>
 	
 	
