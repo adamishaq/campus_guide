@@ -34,11 +34,12 @@
             	position: location,
             	map: map
          	});
-         	$.post("http://localhost:8080/wicket/bookmarkable/uk.ac.ic.doc.campusProject.web.pages.mapping.MapGeoTagPage", { coord : 5 });
+         	wicketAjaxPost(callback + '&long='+ location.lng() + '&lat=' + location.lat(), function() {}, function() {}); 
 	  }
 	  </script>
   </head>
-  <body onload="initialize()">
+  <body onload=initialize()>
+        <div wicket:id="mk"></div>
         <div id="map_canvas" style="width:50%; height:50%"></div>
   </body>
 </html>
