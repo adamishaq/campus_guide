@@ -1,0 +1,32 @@
+<html>
+	<head>
+	</head>
+	<body>
+		<div wicket:id="injector"></div>
+		<img src="marker.png" id="marker1" style="display: none; position: absolute;" />
+		<img src="marker.png" id="marker2" style="display: none; position: absolute;" />
+		<script src="http://code.jquery.com/jquery-latest.js"></script>
+	    <script>
+	    var count = 0;
+	    var left, top;
+	    $(document).ready(function() {
+			$(map).mousedown(function(e) {
+				if(count==0){
+					left = e.pageX;
+			    	top = e.pageY;
+			    	$(marker1).css('left', e.pageX).css('top', e.pageY).show();
+			    	count++;
+			    } else {
+			    	$(marker1).css('left', left).css('top', top).show();
+			    	$(marker2).css('left', e.pageX).css('top', e.pageY).show();
+			    }
+				wicketAjaxPost(callback + '&x=' + e.pageX + '&y=' + e.pageY);
+			});
+		  });
+		</script>
+		<form wicket:id="submitCoordinates">
+			<input wicket:id="submitForm" type="submit" value="Save" />
+		</form>
+		<img wicket:id="map"></img>
+	</body>
+</html>

@@ -18,10 +18,8 @@
           zoom: 17,
           mapTypeId: google.maps.MapTypeId.HYBRID
         };
-        
         map = new google.maps.Map(document.getElementById("map_canvas"), myOptions);
 			
-		
 		google.maps.event.addListener(map, 'click', function(event){
 		
 			longitude = event.latLng;
@@ -40,7 +38,8 @@
   </head>
   <body onload=initialize()>
         <div wicket:id="mk"></div>
-        <div id="map_canvas" style="width:50%; height:50%"></div>
+        <div id="map_canvas" style="width:80%; height:80%"></div>
+        <b>Select two different corners of the building currently being tagged, as accurately as you can</b>
   </body>
 </html>
 

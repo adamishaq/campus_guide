@@ -111,7 +111,7 @@ public class MapUploadPage extends AdminPage {
 						stmt.setBytes(4, currentFloor.getFloorPlan().getImage());
 						stmt.execute();
 						conn.close();
-						setResponsePage(new MapGeoTagPage(images));
+						setResponsePage(new MapGeoTagParentPage(images));
 					} 
 					catch (SQLException e) {
 						log.error(e);
