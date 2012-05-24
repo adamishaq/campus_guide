@@ -105,9 +105,7 @@ public class MapGeoTagPanel extends WebPage {
 			}
 		});
 		add(submitCoordinates);
-		
-		
-		
+
 	}
 		
 	

@@ -4,8 +4,12 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
+
+import javax.imageio.ImageIO;
 
 import org.apache.log4j.Logger;
 import org.apache.wicket.markup.html.form.Form;
@@ -17,10 +21,12 @@ import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.FeedbackPanel;
 import org.apache.wicket.model.PropertyModel;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.DynamicImageResource;
 import org.apache.wicket.util.lang.Bytes;
 
 import uk.ac.ic.doc.campusProject.model.FloorPlanDao;
+import uk.ac.ic.doc.campusProject.model.SerializableBufferedImage;
 import uk.ac.ic.doc.campusProject.utils.db.DatabaseConnectionManager;
 import uk.ac.ic.doc.campusProject.utils.pdf.PdfProcessor;
 import uk.ac.ic.doc.campusProject.web.pages.AdminPage;
@@ -66,12 +72,76 @@ public class MapUploadPage extends AdminPage {
 		
 	}
 	
+	public MapUploadPage(PageParameters param) {
+		setPageLocation("Mapping - Upload new Maps");
+		
+		add(new FeedbackPanel("feedback"));
+		
+		UploadForm uploadForm = new UploadForm();
+		uploadForm.setVisible(false);
+		add(uploadForm);
+		
+		String building = param.get("building").toString();
+		EditForm editForm = new EditForm(populateFloorPlanDao(building));
+		add(editForm);
+	}
+	
+	private List<FloorPlanDao> populateFloorPlanDao(String building) {
+		List<FloorPlanDao> returnPlans = new ArrayList<FloorPlanDao>();
+		Connection conn = DatabaseConnectionManager.getConnection("live");
+		try {
+			PreparedStatement stmt = conn.prepareStatement("SELECT * FROM Floor WHERE Building=?");
+			stmt.setString(1, building);
+			if (stmt.execute()) {
+				ResultSet rs = stmt.getResultSet();
+				while (rs.next()) {
+					try {
+						SerializableBufferedImage buffImage = new SerializableBufferedImage(ImageIO.read(rs.getBlob("Plan").getBinaryStream()));
+						int floor = rs.getInt("Floor");
+						String rsBuilding = rs.getString("Building");
+						returnPlans.add(new FloorPlanDao(buffImage, rsBuilding, String.valueOf(floor)));
+					} 
+					catch (IOException e) {
+						e.printStackTrace();
+					}
+				}
+			}
+			conn.close();
+		} 
+		catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return returnPlans;
+	}
+
 	class EditForm extends Form<Void> {
 		private static final long serialVersionUID = 1L;
 		private ListView<FloorPlanDao> uploadedImages;
 
 		public EditForm() {
 			super("editForm");
+			uploadedImages = new ListView<FloorPlanDao>("uploadedImages", images) {
+				private static final long serialVersionUID = 1L;
+
+				protected void populateItem(final ListItem<FloorPlanDao> item) {
+					item.add(new Image("preview", new DynamicImageResource() {
+						private static final long serialVersionUID = 1L;
+
+						@Override
+						protected byte[] getImageData(Attributes attributes) {
+							return item.getModel().getObject().getFloorPlan().getThumb();
+						}
+					}));
+					item.add(new TextField<String>("building", new PropertyModel<String>(item.getModel().getObject(), "building")));
+					item.add(new TextField<String>("floor", new PropertyModel<String>(item.getModel().getObject(), "floor")));
+				}
+			};
+			add(uploadedImages);
+		}
+		
+		public EditForm(List<FloorPlanDao> daos) {
+			super("editForm");
+			images = daos;
 			uploadedImages = new ListView<FloorPlanDao>("uploadedImages", images) {
 				private static final long serialVersionUID = 1L;
 
