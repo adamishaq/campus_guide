@@ -25,14 +25,12 @@ public class MapGeoTagParentPage extends AdminPage  {
 
 	public MapGeoTagParentPage() {
 		setPageLocation("Mapping - Geo-Tagging");
-		initialiseGeoTagModal();
-		initialiseMapTagModal();
 	}
 
 
 	public MapGeoTagParentPage(final List<FloorPlanDao> daos) {
 		setPageLocation("Mapping - Geo-Tagging");
-		initialiseGeoTagModal();
+		initialiseGeoTagModal(daos.get(0).getBuilding());
 		initialiseMapTagModal();
 		//selectedFloor = new PropertyModel<String>(this, "selectedFloor");
 		List<String> floorList = new ArrayList<String>();
@@ -68,7 +66,7 @@ public class MapGeoTagParentPage extends AdminPage  {
 		add(floors);
 	}
 
-	public void initialiseGeoTagModal() {
+	public void initialiseGeoTagModal(final String building) {
 		add(geoTagModal = new ModalWindow("geoTagModal"));
 		geoTagModal.setPageCreator(new ModalWindow.PageCreator() {
 			private static final long serialVersionUID = 1L;
@@ -76,7 +74,7 @@ public class MapGeoTagParentPage extends AdminPage  {
 			@Override
 			public Page createPage() {
 				return new MapGeoTagPanel(MapGeoTagParentPage.this
-						.getPageReference(), geoTagModal);
+						.getPageReference(), geoTagModal, building);
 			}
 		});
 		geoTagModal.setTitle("Geo-tag Map");
