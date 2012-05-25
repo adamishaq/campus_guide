@@ -9,11 +9,14 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.extensions.ajax.markup.html.modal.ModalWindow;
 import org.apache.wicket.markup.html.form.DropDownChoice;
+import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
 
 import uk.ac.ic.doc.campusProject.model.FloorPlanDao;
 import uk.ac.ic.doc.campusProject.web.pages.AdminPage;
+import uk.ac.ic.doc.campusProject.web.pages.mapping.modal.MapCoordinateTagModal;
+import uk.ac.ic.doc.campusProject.web.pages.mapping.modal.MapGeoTagModal;
 
 public class MapGeoTagParentPage extends AdminPage  {
 	private static final long serialVersionUID = 1L;
@@ -32,7 +35,16 @@ public class MapGeoTagParentPage extends AdminPage  {
 		setPageLocation("Mapping - Geo-Tagging");
 		initialiseGeoTagModal(daos.get(0).getBuilding());
 		initialiseMapTagModal();
-		//selectedFloor = new PropertyModel<String>(this, "selectedFloor");
+		
+		add(new Link<Void>("tagRooms") {
+			private static final long serialVersionUID = 1L;
+			
+			@Override
+			public void onClick() {
+				setResponsePage(new RoomTagPage(daos, null));
+			}
+		});
+		
 		List<String> floorList = new ArrayList<String>();
 		for (int x = 0; x < daos.size(); x++) {
 			floorList.add(daos.get(x).getFloor());
@@ -49,7 +61,7 @@ public class MapGeoTagParentPage extends AdminPage  {
 			@Override
 			protected void onSelectionChanged(String newSelection) {
 				for (int x = 0; x < daos.size(); x++) {
-					final MapCoordinateTagPanel tagPanel = new MapCoordinateTagPanel(MapGeoTagParentPage.this.getPageReference(), mapTagModal, daos.get(x));
+					final MapCoordinateTagModal tagPanel = new MapCoordinateTagModal(MapGeoTagParentPage.this.getPageReference(), mapTagModal, daos.get(x));
 					if (daos.get(x).getFloor().equals(newSelection)) {
 						log.info("Changing floor DAO");
 						mapTagModal.setPageCreator(new ModalWindow.PageCreator() {
@@ -73,7 +85,7 @@ public class MapGeoTagParentPage extends AdminPage  {
 
 			@Override
 			public Page createPage() {
-				return new MapGeoTagPanel(MapGeoTagParentPage.this
+				return new MapGeoTagModal(MapGeoTagParentPage.this
 						.getPageReference(), geoTagModal, building);
 			}
 		});

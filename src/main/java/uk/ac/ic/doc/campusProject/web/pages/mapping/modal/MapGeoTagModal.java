@@ -1,6 +1,6 @@
-package uk.ac.ic.doc.campusProject.web.pages.mapping;
+package uk.ac.ic.doc.campusProject.web.pages.mapping.modal;
 
-import java.awt.Point;
+import java.awt.geom.Point2D;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -16,38 +16,26 @@ import org.apache.wicket.extensions.ajax.markup.html.modal.ModalWindow;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.WebPage;
 import org.apache.wicket.markup.html.form.Form;
-import org.apache.wicket.markup.html.image.Image;
 import org.apache.wicket.request.cycle.RequestCycle;
-import org.apache.wicket.request.resource.DynamicImageResource;
 
-import uk.ac.ic.doc.campusProject.model.FloorPlanDao;
 import uk.ac.ic.doc.campusProject.utils.db.DatabaseConnectionManager;
 import uk.ac.ic.doc.campusProject.web.pages.CallbackUrlInjector;
 
-public class MapCoordinateTagPanel extends WebPage {
+public class MapGeoTagModal extends WebPage {
 
+	static Logger log = Logger.getLogger(MapGeoTagModal.class);	
 	private static final long serialVersionUID = 1L;
-    static Logger log = Logger.getLogger(MapCoordinateTagPanel.class);
-    WebMarkupContainer mapCanvas;
-	List<Point> points = new ArrayList<Point>();
+	private WebMarkupContainer dummyContainer;
+	List<Point2D.Double> points = new ArrayList<Point2D.Double>();
 	
 	
-	public MapCoordinateTagPanel(final PageReference parent, final ModalWindow modal, final FloorPlanDao floorPlan) {
-		add(new Image("map", new DynamicImageResource() {
+	public MapGeoTagModal(final PageReference parent, final ModalWindow window, final String building) {
+		final AbstractDefaultAjaxBehavior behave = new AbstractDefaultAjaxBehavior() {
 			private static final long serialVersionUID = 1L;
-
-			@Override
-			protected byte[] getImageData(Attributes attributes) {
-				return floorPlan.getFloorPlan().getImage();
-			}		
-		}).setMarkupId("map"));
-		
-		final AbstractDefaultAjaxBehavior behaviour = new AbstractDefaultAjaxBehavior() {
-			private static final long serialVersionUID = 1L;
-
+			
 			@Override
 			protected void respond(AjaxRequestTarget target) {
-				int xCoord = 0, yCoord = 0;
+				double longitude = 0L, latitude = 0L;
 				String url = RequestCycle.get().getRequest().getUrl().toAbsoluteString();
 				String[] parameters = url.split("&");
 				if (parameters.length != 4) {
@@ -56,18 +44,20 @@ public class MapCoordinateTagPanel extends WebPage {
 				for (int x = 0; x < parameters.length; x++) {
 					String currentItem = parameters[x];
 					String[] keyValue = currentItem.split("=");
-					if (keyValue[0].equals("x")) {
-						xCoord = Integer.parseInt(keyValue[1]);
+					if (keyValue[0].equals("long")) {
+						longitude = Double.parseDouble(keyValue[1]);
 					}
-					else if (keyValue[0].equals("y")) {
-						yCoord  = Integer.parseInt(keyValue[1]);
+					else if (keyValue[0].equals("lat")) {
+						latitude = Double.parseDouble(keyValue[1]);
 					}
 				}
-				points.add(new Point(xCoord, yCoord));
+				log.info(longitude + ", " + latitude);
+				points.add(new Point2D.Double(longitude, latitude));
 			}
+			
 		};
-		add(mapCanvas = new CallbackUrlInjector("injector", behaviour));
-		mapCanvas.add(behaviour);
+		add(dummyContainer = new CallbackUrlInjector("mk", behave));
+		dummyContainer.add(behave);
 		
 		Form<Void> submitCoordinates = new Form<Void>("submitCoordinates"){
 			private static final long serialVersionUID = 1L;
@@ -78,19 +68,19 @@ public class MapCoordinateTagPanel extends WebPage {
 					log.error("Too many points");
 				}
 				else {
-					for (Point point : points) {
+					for (Point2D.Double point : points) {
 						if (point.x == 0 && point.y == 0) {
 							log.error("Invalid coordinates set");
 						}
 					}
 					Connection conn = DatabaseConnectionManager.getConnection("live");
 					try {
-						PreparedStatement stmt = conn.prepareStatement("UPDATE Building_Map_Attributes SET Pixel_x_1=?, Pixel_y_1=?, Pixel_x_2=?, Pixel_y_2=? WHERE Building=?");
-						stmt.setInt(1, points.get(0).x);
-						stmt.setInt(2, points.get(0).y);
-						stmt.setInt(3, points.get(1).x);
-						stmt.setInt(4, points.get(1).y);
-						stmt.setString(5, floorPlan.getBuilding());
+						PreparedStatement stmt = conn.prepareStatement("UPDATE Building SET Longitude_point_1=?, Latitude_point_1=?, Longitude_point_2=?, Latitude_point_2=? WHERE Name=?");
+						stmt.setDouble(1, points.get(0).x);
+						stmt.setDouble(2, points.get(0).y);
+						stmt.setDouble(3, points.get(1).x);
+						stmt.setDouble(4, points.get(1).y);
+						stmt.setString(5, building);
 						stmt.execute();
 						conn.close();
 					}
@@ -106,15 +96,17 @@ public class MapCoordinateTagPanel extends WebPage {
 
 			@Override
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-				modal.close(target);	
+				window.close(target);	
 			}
 
 			@Override
 			protected void onError(AjaxRequestTarget target, Form<?> form) {
-				modal.close(target);
+				window.close(target);
 			}
 		});
 		add(submitCoordinates);
-	}
 
+	}
+		
+	
 }

@@ -1,0 +1,16 @@
+<wicket:extend>
+	<select wicket:id="floorChoice"></select>
+	<img src="marker.png" id="marker1" style="display: none; position: absolute;" />
+	<div wicket:id="injector"></div>
+	<div wicket:id="tagModal"></div>
+	<script src="http://code.jquery.com/jquery-latest.js"></script>
+	<script>
+		$(document).ready(function() {
+			$(map).mousedown(function(e) {
+				$(marker1).css('left', e.pageX).css('top', e.pageY).show();
+				wicketAjaxPost(callback + '&x=' + e.pageX + '&y=' + e.pageY);
+			});
+		});
+	</script>
+	<img wicket:id="map"></img>
+</wicket:extend>
