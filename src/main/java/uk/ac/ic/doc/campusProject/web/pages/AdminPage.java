@@ -5,8 +5,9 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.model.PropertyModel;
 
-import uk.ac.ic.doc.campusProject.web.pages.mapping.MapGeoTagPage;
+import uk.ac.ic.doc.campusProject.web.pages.mapping.MapGeoTagParentPage;
 import uk.ac.ic.doc.campusProject.web.pages.mapping.MappingLandingPage;
+import uk.ac.ic.doc.campusProject.web.pages.mapping.modal.MapGeoTagModal;
 import uk.ac.ic.doc.campusProject.web.panel.TopNavigationBar;
 
 public abstract class AdminPage extends WebPage {
@@ -19,7 +20,7 @@ public abstract class AdminPage extends WebPage {
 		add(new TopNavigationBar("navBar"));
 		add(new BookmarkablePageLink<Void>("home", HomePage.class));
 		add(new BookmarkablePageLink<Void>("mapping", MappingLandingPage.class));
-		add(new BookmarkablePageLink<Void>("mapgeotag", MapGeoTagPage.class));
+		add(new BookmarkablePageLink<Void>("mapgeotag", MapGeoTagParentPage.class));
 	}
 	
 

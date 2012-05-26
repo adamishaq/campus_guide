@@ -28,6 +28,7 @@ public class RoomTagPage extends AdminPage {
 	ModalWindow tagModal;
 	WebMarkupContainer mapCanvas;
 	NonCachingImage map;
+	//http://api.jquery.com/add/ - inject array of coordinates
 
 	public RoomTagPage(final List<FloorPlanDao> daos, final String floor) {
 		setPageLocation("Room Tagging");
