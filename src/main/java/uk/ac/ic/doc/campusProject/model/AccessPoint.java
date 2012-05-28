@@ -3,11 +3,13 @@ package uk.ac.ic.doc.campusProject.model;
 public class AccessPoint {
 	private String mac;
 	private String hostname;
+	private String location;
 	private double signalStrength;
 	
-	public AccessPoint(String mac, String hostname, double signalStrength) {
+	public AccessPoint(String mac, String hostname, String location, double signalStrength) {
 		this.mac = mac;
 		this.hostname = hostname;
+		this.location = location;
 		this.signalStrength = signalStrength;
 	}
 	
@@ -43,6 +45,16 @@ public class AccessPoint {
 
 	public void setSignalStrength(double signalStrength) {
 		this.signalStrength = signalStrength;
+	}
+
+
+	public String getLocation() {
+		return location;
+	}
+
+
+	public void setLocation(String location) {
+		this.location = location;
 	}
 	
 	

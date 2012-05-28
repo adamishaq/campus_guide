@@ -27,6 +27,7 @@ public class MappingApi extends HttpServlet {
 
 	private static final long serialVersionUID = 1L;
 	Logger log = Logger.getLogger(MappingApi.class);
+	private char MAC_OFFSET = '2';
 	
 	@Override
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) {
@@ -71,12 +72,15 @@ public class MappingApi extends HttpServlet {
 					String macThis = request.getParameter(macParameter);
 					String ssThis = request.getParameter(ssParameter);
 					if (macThis != null && ssThis != null) {
-						PreparedStatement stmt = conn.prepareStatement("SELECT Hostname FROM WirelessAccessPoints WHERE MAC=?");
+						macThis = parseMacAddress(macThis);
+						PreparedStatement stmt = conn.prepareStatement("SELECT Hostname, Location FROM WirelessAccessPoints WHERE Radio_MAC=?");
 						stmt.setString(1, macThis);
 						if (stmt.execute()) {
 							ResultSet rs = stmt.getResultSet();
 							while(rs.next()) {
-								ap = new AccessPoint(macThis, rs.getString("Hostname"), Double.parseDouble(ssThis));
+								log.info("We have locations:");
+								ap = new AccessPoint(macThis, rs.getString("Hostname"), rs.getString("Location"), Double.parseDouble(ssThis));
+								log.info("location:" + ap.getLocation() + ", ss:" + ap.getSignalStrength());
 								accessPoints.add(ap);
 							}
 						}
@@ -84,17 +88,22 @@ public class MappingApi extends HttpServlet {
 				}
 				Collections.sort(accessPoints, new AccessPointComparator());
 
-				String floor, building;
+				String floor, building, location;
 				AccessPoint verifiedLocation;
 				if (verifyLocation(accessPoints) != null) {
 					verifiedLocation = verifyLocation(accessPoints);
 					building = verifiedLocation.getBuildingFromHostname();
 					floor = verifiedLocation.getFloorFromHostname();
+					location = verifiedLocation.getLocation();
+					log.info("Verified Location:");
+					log.info("building:" + building + ", floor:" + floor + ", location:" + location);
 				}
 				else {
 					building = "hux";
 					floor = "2";
+					location = "219";
 				}
+				/*
 				
 				PreparedStatement stmt = conn.prepareStatement("SELECT * FROM Building LEFT JOIN Building_Map_Attributes ON Name=Building WHERE ShortCode=?");
 				stmt.setString(1, building);
@@ -122,7 +131,7 @@ public class MappingApi extends HttpServlet {
 						String scale = rs.getString("Scale");
 						scale = scale.split(":")[1];
 					}
-					/* The magic number - Investigate persisting this value */
+					// The magic number - Investigate persisting this value 
 					
 					double pixelPerMetre = pixelDistance / coordinateDistance;
 					
@@ -146,8 +155,34 @@ public class MappingApi extends HttpServlet {
 					response.setStatus(HttpServletResponse.SC_OK);
 					os.flush();
 				}
-				
-			}
+			*/	
+			
+				PreparedStatement stmt = conn.prepareStatement("SELECT Xpixel, Ypixel FROM Floor_Contains LEFT JOIN Building ON Floor_Contains.Building = Building.Name WHERE Building.ShortCode=? AND Floor_Contains.Floor=? AND Floor_Contains.Room=?");
+				stmt.setString(1, building);
+				stmt.setString(2, floor);
+				stmt.setString(3, location);
+				if (stmt.execute()) {
+					ResultSet rs = stmt.getResultSet();
+					int xPixel = 0, yPixel = 0;
+					while(rs.next()) {
+						
+						xPixel = rs.getInt("Xpixel");
+						yPixel = rs.getInt("Ypixel");
+					}
+					response.setContentType("text/plain");
+					ServletOutputStream os = response.getOutputStream();
+					os.write(String.valueOf(xPixel).getBytes());
+					byte[] delimiter = ", ".getBytes();
+					os.write(delimiter);
+					os.write(String.valueOf(yPixel).getBytes());
+					os.write(delimiter);
+					os.write(floor.getBytes());
+					os.write(delimiter);
+					os.write(building.getBytes());
+					response.setStatus(HttpServletResponse.SC_OK);
+					os.flush();
+				}
+			}			
 			conn.close();
 		} 
 		catch (SQLException e) {
@@ -266,4 +301,28 @@ public class MappingApi extends HttpServlet {
 		 }
 		 return null;
 	 }
+	 
+	 private String parseMacAddress(String macIn){
+		 StringBuilder mac = new StringBuilder();
+		 log.info(macIn);
+		 String[] macHexValues = macIn.split(":");
+		 if (macHexValues.length == 6) {
+			 String macFinalHex = macHexValues[5];
+			 char[] macByteArray = macFinalHex.toCharArray();
+			 if (macByteArray.length == 2) {
+				 macByteArray[1] = '0';
+			 }
+			 macFinalHex = String.copyValueOf(macByteArray);
+			 macHexValues[5] = macFinalHex;
+			 mac.append(macHexValues[0]);
+			 for (int x = 1; x < macHexValues.length; x++) {
+				 mac.append(":");
+				 mac.append(macHexValues[x]);
+			 }
+		 }
+		 log.info(mac.toString());
+		 
+		 return mac.toString();
+	 }
+	 
 }

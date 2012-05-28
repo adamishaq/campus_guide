@@ -2,10 +2,21 @@
 	<select wicket:id="floorChoice"></select>
 	<img src="marker.png" id="marker1" style="display: none; position: absolute;" />
 	<div wicket:id="injector"></div>
+	<div wicket:id="mapPointsOverlay"></div>
 	<div wicket:id="tagModal"></div>
 	<script src="http://code.jquery.com/jquery-latest.js"></script>
 	<script>
+	//INJECT variables from wicket into header, and then call from body
 		$(document).ready(function() {
+		/*
+			$(map).load(function(e) {
+				var offset = $(this).offset();
+				
+				$("div").add("<img src=\"/marker.png\" id=\"marker5-10\" style=\"display: none; position: absolute;\" />").appendTo(document.body).css('left', offset.left + 5).css('top', offset.top + 10).show();
+				$("div").add("<img src=\"/marker.png\" id=\"marker10-5\" style=\"display: none; position: absolute;\" />").appendTo(document.body).css('left', offset.left + 10).css('top', offset.top + 5).show();
+
+			});
+*/
 			$(map).mousedown(function(e) {
 				$(marker1).css('left', e.pageX).css('top', e.pageY).show();
 				wicketAjaxPost(callback + '&x=' + e.pageX + '&y=' + e.pageY);
