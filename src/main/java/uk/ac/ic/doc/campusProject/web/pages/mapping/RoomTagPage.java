@@ -1,7 +1,9 @@
 package uk.ac.ic.doc.campusProject.web.pages.mapping;
 
 import java.awt.Point;
+import java.io.IOException;
 import java.io.Serializable;
+import java.sql.Blob;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -11,6 +13,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import javax.imageio.ImageIO;
 
 import org.apache.log4j.Logger;
 import org.apache.wicket.Page;
@@ -27,6 +31,9 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.resource.DynamicImageResource;
 
 import uk.ac.ic.doc.campusProject.model.FloorPlanDao;
+import uk.ac.ic.doc.campusProject.model.RoomDetailsDao;
+import uk.ac.ic.doc.campusProject.model.RoomType;
+import uk.ac.ic.doc.campusProject.model.SerializableBufferedImage;
 import uk.ac.ic.doc.campusProject.utils.db.DatabaseConnectionManager;
 import uk.ac.ic.doc.campusProject.web.pages.AdminPage;
 import uk.ac.ic.doc.campusProject.web.pages.CallbackUrlInjector;
@@ -47,6 +54,16 @@ public class RoomTagPage extends AdminPage {
 		setPageLocation("Room Tagging");
 		add(tagModal = new ModalWindow("tagModal"));
 		tagModal.setTitle("Room Information");
+		tagModal.setWindowClosedCallback(new ModalWindow.WindowClosedCallback() {
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			public void onClose(AjaxRequestTarget target) {
+				log.info("callback called");
+				setResponsePage(new RoomTagPage(daos, floor));
+				
+			}
+		});
 		floorChoice = new DropDownChoice<String>("floorChoice", new Model<String>(), getFloorList(daos)) {
 			private static final long serialVersionUID = 1L;
 			
@@ -90,11 +107,11 @@ public class RoomTagPage extends AdminPage {
 			@Override
 			protected void respond(AjaxRequestTarget target) {
 				int xCoord = 0, yCoord = 0;
+				boolean error = false;
+				String room = null;
 				String url = RequestCycle.get().getRequest().getUrl().toAbsoluteString();
+				log.info(url);
 				String[] parameters = url.split("&");
-				if (parameters.length != 4) {
-					log.error("error");
-				}
 				for (int x = 0; x < parameters.length; x++) {
 					String currentItem = parameters[x];
 					String[] keyValue = currentItem.split("=");
@@ -104,18 +121,77 @@ public class RoomTagPage extends AdminPage {
 					else if (keyValue[0].equals("y")) {
 						yCoord  = Integer.parseInt(keyValue[1]);
 					}
+					else if (keyValue[0].equals("room")) {
+						if (keyValue.length > 1) {
+							room = keyValue[1];
+							room = room.substring(2, room.length());
+							log.info(room);
+						}
+						else {
+							error = true;
+						}
+					}
 				}
 				Point point = new Point(xCoord, yCoord);
-				final RoomTagInfoModal roomTagModal = new RoomTagInfoModal(RoomTagPage.this.getPageReference(), tagModal, getFloorPlanDao(daos, floor), point);
-				tagModal.setPageCreator(new ModalWindow.PageCreator() {
-					private static final long serialVersionUID = 1L;
-
-					@Override
-					public Page createPage() {
-						return roomTagModal;
+				final RoomTagInfoModal roomTagModal;
+				if (room != null) {
+					FloorPlanDao dao = getFloorPlanDao(daos, floor);
+					Connection conn = DatabaseConnectionManager.getConnection("live");
+					RoomDetailsDao roomDetails = null;
+					try {
+						PreparedStatement stmt = conn.prepareStatement("SELECT Type, Description, Image FROM Room WHERE Number=? AND Building=?");
+						stmt.setString(1, room);
+						stmt.setString(2, dao.getBuilding());
+						if (stmt.execute()) {
+							ResultSet rs = stmt.getResultSet();
+							while (rs.next()) {
+								RoomType type = RoomType.getType(rs.getString("Type"));
+								String description = rs.getString("Description");
+								Blob blob = rs.getBlob("Image");
+								SerializableBufferedImage image = null;
+								if (!rs.wasNull()) {
+									try {
+										image = new SerializableBufferedImage(ImageIO.read(blob.getBinaryStream()));
+									} 
+									catch (IOException e) {
+										log.error(e);
+										e.printStackTrace();
+									}
+									catch (IllegalArgumentException e) {
+										image = null;
+										log.error(e);
+									}
+								}
+								roomDetails = new RoomDetailsDao(room, dao.getBuilding(), type, description, image);
+							}
+						}
+					} catch (SQLException e) {
+						log.error(e);
+						e.printStackTrace();
 					}
-				});
-				tagModal.show(target);
+					roomTagModal = new RoomTagInfoModal(RoomTagPage.this.getPageReference(), tagModal, getFloorPlanDao(daos, floor), point, roomDetails);	
+					tagModal.setPageCreator(new ModalWindow.PageCreator() {
+						private static final long serialVersionUID = 1L;
+
+						@Override
+						public Page createPage() {
+							return roomTagModal;
+						}
+					});
+					tagModal.show(target);
+				}
+				else if (!error){
+					roomTagModal = new RoomTagInfoModal(RoomTagPage.this.getPageReference(), tagModal, getFloorPlanDao(daos, floor), point);
+					tagModal.setPageCreator(new ModalWindow.PageCreator() {
+						private static final long serialVersionUID = 1L;
+
+						@Override
+						public Page createPage() {
+							return roomTagModal;
+						}
+					});
+					tagModal.show(target);
+				}
 			}
 		};
 		
@@ -179,19 +255,25 @@ public class RoomTagPage extends AdminPage {
 		
 		@Override
 		public void renderHead(IHeaderResponse response) {
-			//Inject x,y variables instead of image elements from header
 			Set<String> keys = floorPoints.keySet();
-			StringBuilder urlBuilder = new StringBuilder();
-			urlBuilder.append("$(map).load(function(e) {");
-			urlBuilder.append('\n');
-			urlBuilder.append("var offset = $(this).offset();");
-			urlBuilder.append('\n');
-			for(String key : keys) {
-				urlBuilder.append("$(\"div\").add(\"<img src=\"/marker.png\" id=\"rm" + key + "\" style=\"display: none; position: absolute;\" />\").appendTo(document.body).css('left', offset.left + " + floorPoints.get(key).x +").css('top', offset.top + " + floorPoints.get(key).x +").show();");
-				urlBuilder.append('\n');
+			StringBuilder jsonBuilder = new StringBuilder();
+			jsonBuilder.append("var points = ");
+			jsonBuilder.append("[");
+			for (String key : keys) {
+				jsonBuilder.append("{");
+				jsonBuilder.append("\"room\":\"" + key + "\" , ");
+				jsonBuilder.append("\"x\":" + floorPoints.get(key).x + " , ");
+				jsonBuilder.append("\"y\":" + floorPoints.get(key).y + "");
+				jsonBuilder.append("}");
+				jsonBuilder.append(",");
 			}
-			response.renderJavaScriptReference("http://code.jquery.com/jquery-latest.js");
-			response.renderOnLoadJavaScript(urlBuilder.toString());
+			int lastComma = jsonBuilder.lastIndexOf(",");
+			if (lastComma > 0) {
+				jsonBuilder.deleteCharAt(lastComma);
+			}
+			jsonBuilder.append("];");
+			log.info(jsonBuilder.toString());
+			response.renderJavaScript(jsonBuilder.toString(), "jsonInject");
 		}
 		
 		

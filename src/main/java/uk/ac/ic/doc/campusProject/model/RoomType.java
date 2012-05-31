@@ -19,8 +19,17 @@ public enum RoomType {
 		this.typeString = typeString;
 	}
 	
-	public String getTypeString() {
-		return typeString;
+	public String getFriendlyName(RoomType type) {
+		return type.typeString;
+	}
+	
+	public static RoomType getType(String type) {
+		for (RoomType roomType : RoomType.values()) {
+			if (roomType.toString().equals(type)) {
+				return roomType;
+			}
+		}
+		return RoomType.OTHER;
 	}
 	
 }

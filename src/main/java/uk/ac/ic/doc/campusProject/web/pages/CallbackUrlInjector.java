@@ -16,7 +16,6 @@ public class CallbackUrlInjector extends WebMarkupContainer implements IHeaderCo
 	
 	public void renderHead(IHeaderResponse response) {
 		String callback = new String("var callback = '" + this.behaviour.getCallbackUrl() + "';");
-		response.renderOnLoadJavaScript("initialize()");
 		response.renderJavaScript(callback, "jsinject");
 	}
 	

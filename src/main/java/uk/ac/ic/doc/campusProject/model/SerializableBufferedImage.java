@@ -22,6 +22,11 @@ public class SerializableBufferedImage implements Serializable {
 		return this.thumb;
 	}
 
+	public SerializableBufferedImage() {
+		this.image = new byte[]{};
+		this.thumb = new byte[]{};
+	}
+	
 	public SerializableBufferedImage(BufferedImage image) {
 		this.image = generateImage(image);
 		this.thumb = generateThumbnail(image);

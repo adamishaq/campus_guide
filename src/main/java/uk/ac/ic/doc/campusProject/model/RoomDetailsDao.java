@@ -26,7 +26,7 @@ public class RoomDetailsDao implements Serializable {
 		this.building = building;
 		this.type = RoomType.OTHER;
 		this.description = "";
-		this.image = null;
+		this.image = new SerializableBufferedImage();
 	}
 	
 	public String getNumber() {
