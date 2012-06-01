@@ -54,7 +54,7 @@ public class PlacesApi extends HttpServlet {
 					jsonObject.put("description", rs.getString("Description"));
 					Blob blob = rs.getBlob("Image");
 					if (blob == null) {
-						jsonObject.put("image", 0);
+						jsonObject.put("image", new byte[]{});
 					}
 					else {
 						jsonObject.put("image", blob.getBytes(1, (int)blob.length()));
