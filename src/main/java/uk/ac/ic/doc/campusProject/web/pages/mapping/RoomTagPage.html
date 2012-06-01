@@ -8,11 +8,11 @@
 	<script>
 		$(document).ready(function() {
 			$(map).load(function(e) {
-				var offset = $(this).offset();
+				var offset = $(map).offset();
 				jQuery.each(points, function() {
 					var room = this.room;
-					var x = this.x;
-					var y = this.y;
+					var x = this.x + offset.left;
+					var y = this.y + offset.top;
 					$("div").add("<img src=\"/marker.png\" id=\"rm" + room + "\" style=\"display: none; position: absolute;\" />").appendTo(document.body).css('left', x).css('top', y).show();
 				});
 			});
@@ -25,10 +25,14 @@
 			*/
 			$("body").mousedown(function(e) {
 				if(e.target.id == "map") {
+					var offset = $(map).offset();
 					$(marker1).css('left', e.pageX).css('top', e.pageY).show();
-					wicketAjaxPost(callback + '&x=' + e.pageX + '&y=' + e.pageY);
+					var x = e.pageX - offset.left;
+					var y = e.pageY - offset.top;
+					wicketAjaxPost(callback + '&x=' + x + '&y=' + y);
 				}
 				else if (e.target.nodeName = "IMG") {
+					var offset = $(this).offset();
 					wicketAjaxPost(callback + '&x=' + e.pageX + '&y=' + e.pageY + '&room=' + e.target.id);
 				}
 				
