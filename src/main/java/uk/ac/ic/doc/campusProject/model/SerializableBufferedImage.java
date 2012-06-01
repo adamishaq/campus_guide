@@ -36,9 +36,13 @@ public class SerializableBufferedImage implements Serializable {
 		return this.image;
 	}
 
-	public void setImage(BufferedImage image) {
+	public void setBufferedImage(BufferedImage image) {
 		this.image = generateImage(image);
 		this.thumb = generateThumbnail(image);
+	}
+	
+	public void setImage(byte[] image) {
+		this.image = image;
 	}
 	
 	private byte[] generateThumbnail(BufferedImage image) {

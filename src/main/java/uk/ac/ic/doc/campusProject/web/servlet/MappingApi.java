@@ -18,6 +18,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.log4j.Logger;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import uk.ac.ic.doc.campusProject.model.AccessPoint;
 import uk.ac.ic.doc.campusProject.utils.comparator.AccessPointComparator;
@@ -27,7 +29,6 @@ public class MappingApi extends HttpServlet {
 
 	private static final long serialVersionUID = 1L;
 	Logger log = Logger.getLogger(MappingApi.class);
-	private char MAC_OFFSET = '2';
 	
 	@Override
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) {
@@ -60,11 +61,11 @@ public class MappingApi extends HttpServlet {
 				}
 			}
 			else {
-				double longitude = 0;
-				double latitude = 0;
+//				double longitude = 0;
+//				double latitude = 0;
 				List<AccessPoint> accessPoints = new ArrayList<AccessPoint>();
-				longitude = Double.parseDouble(request.getParameter("longitude"));
-				latitude = Double.parseDouble(request.getParameter("latitude"));
+//				longitude = Double.parseDouble(request.getParameter("longitude"));
+//				latitude = Double.parseDouble(request.getParameter("latitude"));
 				for (int x = 0 ; x < 25 ; x++) {
 					AccessPoint ap = null;
 					String macParameter = new String("mac" + x);
@@ -169,16 +170,20 @@ public class MappingApi extends HttpServlet {
 						xPixel = rs.getInt("Xpixel");
 						yPixel = rs.getInt("Ypixel");
 					}
-					response.setContentType("text/plain");
+					JSONObject json = new JSONObject();
+					
+					response.setContentType("application/json");
+					try {
+						json.put("x", xPixel);
+						json.put("y", yPixel);
+						json.put("floor", floor);
+						json.put("building", building);
+					} catch (JSONException e) {
+						log.error(e);
+						e.printStackTrace();
+					}
 					ServletOutputStream os = response.getOutputStream();
-					os.write(String.valueOf(xPixel).getBytes());
-					byte[] delimiter = ", ".getBytes();
-					os.write(delimiter);
-					os.write(String.valueOf(yPixel).getBytes());
-					os.write(delimiter);
-					os.write(floor.getBytes());
-					os.write(delimiter);
-					os.write(building.getBytes());
+					os.write(json.toString().getBytes());
 					response.setStatus(HttpServletResponse.SC_OK);
 					os.flush();
 				}
@@ -203,36 +208,38 @@ public class MappingApi extends HttpServlet {
 		}
 	}
 	
-	private double getPythDistance(double x1, double y1, double x2, double y2) {
-		if (x1 == x2) {
-			/* return y distance */
-			return Math.abs(y1 - y2);
-		}
-		else if (y1 == y2) {
-			/* return x distance */
-			return Math.abs(x1 - x2);
-		}
-		else {
-			/* return pythagoras distance */		
-			double v1 = Math.abs(x1 - x2);
-			double v2 = Math.abs(y1 - y2);
-			return Math.sqrt(Math.pow(v1, 2.0) + Math.pow(v2, 2.0));
-			
-		}
-	}
-	
-	 private double getMetresFromCoords(double lat1, double long1, double lat2, double long2) {
-		 final double EARTHRAD = 3958.75;
-		 final int METRECONV = 1609;
-
-		 double dLat = Math.toRadians(lat2-lat1);
-		 double dLng = Math.toRadians(long2-long1);
-		 double a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2)) * Math.sin(dLng/2) * Math.sin(dLng/2);
-		 double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-		 double dist = EARTHRAD * c;
-
-		 return new Double(dist * METRECONV);
-	 }
+//	
+//	private double getPythDistance(double x1, double y1, double x2, double y2) {
+//		if (x1 == x2) {
+//			/* return y distance */
+//			return Math.abs(y1 - y2);
+//		}
+//		else if (y1 == y2) {
+//			/* return x distance */
+//			return Math.abs(x1 - x2);
+//		}
+//		else {
+//			/* return pythagoras distance */		
+//			double v1 = Math.abs(x1 - x2);
+//			double v2 = Math.abs(y1 - y2);
+//			return Math.sqrt(Math.pow(v1, 2.0) + Math.pow(v2, 2.0));
+//			
+//		}
+//	}
+//	
+//	 private double getMetresFromCoords(double lat1, double long1, double lat2, double long2) {
+//		 final double EARTHRAD = 3958.75;
+//		 final int METRECONV = 1609;
+//
+//		 double dLat = Math.toRadians(lat2-lat1);
+//		 double dLng = Math.toRadians(long2-long1);
+//		 double a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2)) * Math.sin(dLng/2) * Math.sin(dLng/2);
+//		 double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+//		 double dist = EARTHRAD * c;
+//
+//		 return new Double(dist * METRECONV);
+//	 }
+	 
 	 
 	 private AccessPoint verifyLocation(List<AccessPoint> accessPoints) {
 		 /* Take the floor of the highest strength AP, get the MAC addresses of all other APs on that floor, 

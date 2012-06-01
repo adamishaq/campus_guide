@@ -13,6 +13,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.log4j.Logger;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import uk.ac.ic.doc.campusProject.utils.db.DatabaseConnectionManager;
 
@@ -41,38 +43,32 @@ public class PlacesApi extends HttpServlet {
 			
 			if (stmt.execute()) {
 				ResultSet rs = stmt.getResultSet();
-				response.setContentType("text/plain");
+				response.setContentType("application/json");
 				ServletOutputStream os = response.getOutputStream();
-				byte[] delimiter = new String("%%").getBytes();
-				int x = 0 ;
+				JSONObject jsonArray = new JSONObject();
 				while(rs.next()) {
-					os.write(rs.getString("Number").getBytes());
-					os.write(delimiter);
-					os.write(rs.getString("Type").getBytes());
-					os.write(delimiter);
-					os.write(rs.getString("Description").getBytes());
-					os.write(delimiter);
+					JSONObject jsonObject = new JSONObject();
+					String number = rs.getString("Number");
+					jsonObject.put("number", number);
+					jsonObject.put("type", rs.getString("Type"));
+					jsonObject.put("description", rs.getString("Description"));
 					Blob blob = rs.getBlob("Image");
-					if (blob.length() == 0) {
-						os.write("NULL".getBytes());
-						os.write(delimiter);
+					if (blob == null) {
+						jsonObject.put("image", 0);
 					}
 					else {
-						os.write(blob.getBytes(1, (int)blob.length()));
-						os.write(delimiter);
+						jsonObject.put("image", blob.getBytes(1, (int)blob.length()));
 					}
-					x++;
+					jsonArray.put("room", jsonObject);
+					
 				}
-				if (x == 0) {
-					os.write("NOTHING".getBytes());
-					os.write(delimiter);
-				}
+				os.write(jsonArray.toString().getBytes());
 				response.setStatus(HttpServletResponse.SC_OK);
 				os.flush();
 			}
 			conn.close();
 			
-		} catch (SQLException | IOException e) {
+		} catch (SQLException | IOException | JSONException e) {
 			e.printStackTrace();
 		}
 		
