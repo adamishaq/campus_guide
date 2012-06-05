@@ -101,7 +101,7 @@ public class PlacesApi extends HttpServlet {
 					conn.close();
 				}
 				else if (room == null){
-					stmt = conn.prepareStatement("SELECT Number, Type, Description, Image FROM Room LEFT JOIN Floor_Contains ON Number=Room AND Room.Building=Floor_Contains.Building LEFT JOIN Building ON Floor_Contains.Building=Building.Name WHERE Building.ShortCode=? AND Floor=?" +
+					stmt = conn.prepareStatement("SELECT Number, Type, Description, Image, Building FROM Room LEFT JOIN Floor_Contains ON Number=Room AND Room.Building=Floor_Contains.Building LEFT JOIN Building ON Floor_Contains.Building=Building.Name WHERE Building.ShortCode=? AND Floor=?" +
 							" AND Xpixel <= ? AND Xpixel >= ? AND Ypixel <= ? AND Ypixel >= ?");
 					stmt.setString(1, building);
 					stmt.setString(2, floor);
@@ -128,6 +128,7 @@ public class PlacesApi extends HttpServlet {
 							else {
 								jsonObject.put("image", blob.getBytes(1, (int)blob.length()));
 							}
+							jsonObject.put("building", rs.getString("Building"));
 							jsonArray.append(jsonObject.toString());
 							jsonArray.append(",");
 							
