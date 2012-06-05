@@ -46,7 +46,7 @@
 	
 	<servlet-mapping>
 		<servlet-name>places</servlet-name>
-		<url-pattern>/api-places</url-pattern>
+		<url-pattern>/api-places/*</url-pattern>
 	</servlet-mapping>
 	
 	
