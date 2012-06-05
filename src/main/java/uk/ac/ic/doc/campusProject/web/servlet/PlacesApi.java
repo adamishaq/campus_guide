@@ -79,10 +79,8 @@ public class PlacesApi extends HttpServlet {
 						ResultSet rs = stmt.getResultSet();
 						response.setContentType("application/json");
 						ServletOutputStream os = response.getOutputStream();
-						StringBuilder jsonArray = new StringBuilder();
-						jsonArray.append("[");
+						JSONObject jsonObject = new JSONObject();
 						while(rs.next()) {
-							JSONObject jsonObject = new JSONObject();
 							String number = rs.getString("Number");
 							jsonObject.put("number", number);
 							jsonObject.put("type", rs.getString("Type"));
@@ -94,13 +92,9 @@ public class PlacesApi extends HttpServlet {
 							else {
 								jsonObject.put("image", blob.getBytes(1, (int)blob.length()));
 							}
-							jsonArray.append(jsonObject.toString());
-							jsonArray.append(",");
 							
 						}
-						jsonArray = jsonArray.replace(jsonArray.length() - 1, jsonArray.length(), "");
-						jsonArray.append("]");
-						os.write(jsonArray.toString().getBytes());
+						os.write(jsonObject.toString().getBytes());
 						response.setStatus(HttpServletResponse.SC_OK);
 						os.flush();
 					}
