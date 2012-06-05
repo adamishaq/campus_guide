@@ -69,7 +69,7 @@ public class PlacesApi extends HttpServlet {
 			}
 			else if (verbose.equals("T")) {
 				if ((left == null || right == null || top == null || bottom == null) && room != null) {
-					stmt = conn.prepareStatement("SELECT Number, Type, Description, Image FROM Room LEFT JOIN Floor_Contains ON Room.Number=Floor_Contains.Room AND Room.Building=Floor_Contains.Building LEFT JOIN Building ON Floor_Contains.Building=Building.Name WHERE Building.ShortCode=? AND Floor=?" +
+					stmt = conn.prepareStatement("SELECT Number, Type, Description, Image, Room.Building FROM Room LEFT JOIN Floor_Contains ON Room.Number=Floor_Contains.Room AND Room.Building=Floor_Contains.Building LEFT JOIN Building ON Floor_Contains.Building=Building.Name WHERE Building.ShortCode=? AND Floor=?" +
 							" AND Room.Number= ?");
 					stmt.setString(1, building);
 					stmt.setString(2, floor);
@@ -92,6 +92,7 @@ public class PlacesApi extends HttpServlet {
 							else {
 								jsonObject.put("image", blob.getBytes(1, (int)blob.length()));
 							}
+							jsonObject.put("building", rs.getString("Building"));
 							
 						}
 						os.write(jsonObject.toString().getBytes());
@@ -101,14 +102,9 @@ public class PlacesApi extends HttpServlet {
 					conn.close();
 				}
 				else if (room == null){
-					stmt = conn.prepareStatement("SELECT Number, Type, Description, Image, Building FROM Room LEFT JOIN Floor_Contains ON Number=Room AND Room.Building=Floor_Contains.Building LEFT JOIN Building ON Floor_Contains.Building=Building.Name WHERE Building.ShortCode=? AND Floor=?" +
-							" AND Xpixel <= ? AND Xpixel >= ? AND Ypixel <= ? AND Ypixel >= ?");
+					stmt = conn.prepareStatement("SELECT Number, Type, Description, Image, Room.Building FROM Room LEFT JOIN Floor_Contains ON Number=Room AND Room.Building=Floor_Contains.Building LEFT JOIN Building ON Floor_Contains.Building=Building.Name WHERE Building.ShortCode=? AND Floor=?");
 					stmt.setString(1, building);
 					stmt.setString(2, floor);
-					stmt.setString(3, right);
-					stmt.setString(4, left);
-					stmt.setString(5, bottom);
-					stmt.setString(6, top);
 					if (stmt.execute()) {
 						ResultSet rs = stmt.getResultSet();
 						response.setContentType("application/json");
