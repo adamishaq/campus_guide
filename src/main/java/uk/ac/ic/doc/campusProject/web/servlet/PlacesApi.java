@@ -26,20 +26,22 @@ public class PlacesApi extends HttpServlet {
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) {
 		Connection conn = DatabaseConnectionManager.getConnection("live");
 		PreparedStatement stmt;
+		log.info(request.getRequestURI());
 		String requestUri = request.getRequestURI().replaceFirst("/", "").trim();
 		String[] uri = requestUri.split("/");
+		
 		try {
-			if (!(uri[0].equals("api-places"))) {
+			if (!(uri[1].equals("api-places"))) {
 				log.info("Issue");
 				throw new InvalidParameterException("Bad first parameter passed");
 			}
 			else {
-				String requestType = uri[1];
+				String requestType = uri[2];
 				log.info(requestType);
 				if (requestType.equals("pixels")) {
-					String building = uri[2];
-					String floor = uri[3];
-					stmt = conn.prepareStatement("SELECT Number, Xpixel, Ypixel FROM Room LEFT JOIN Floor_Contains ON Number=Room AND Room.Building=Floor_Contains.Building LEFT JOIN Building ON Floor_Contains.Building=Building.Name WHERE Building.ShortCode=? AND Floor=?");
+					String building = uri[3];
+					String floor = uri[4];
+					stmt = conn.prepareStatement("SELECT Number, Xpixel, Ypixel FROM Room LEFT JOIN Floor_Contains ON Number=Room AND Room.Building=Floor_Contains.Building LEFT JOIN Building ON Floor_Contains.Building=Building.Name WHERE Building.Name=? AND Floor=?");
 					stmt.setString(1, building);
 					stmt.setString(2, floor);
 					if (stmt.execute()) {
@@ -68,10 +70,10 @@ public class PlacesApi extends HttpServlet {
 					conn.close();
 				}
 				else if (requestType.equals("roominfo")) {
-					String building = uri[2];
-					String floor = uri[3];
-					if (uri.length == 4) {
-						stmt = conn.prepareStatement("SELECT Number, Type, Description, Room.Building FROM Room LEFT JOIN Floor_Contains ON Number=Room AND Room.Building=Floor_Contains.Building LEFT JOIN Building ON Floor_Contains.Building=Building.Name WHERE Building.ShortCode=? AND Floor=?");
+					String building = uri[3];
+					String floor = uri[4];
+					if (uri.length == 5) {
+						stmt = conn.prepareStatement("SELECT Number, Type, Description, Room.Building FROM Room LEFT JOIN Floor_Contains ON Number=Room AND Room.Building=Floor_Contains.Building LEFT JOIN Building ON Floor_Contains.Building=Building.Name WHERE Building.Name=? AND Floor=?");
 						stmt.setString(1, building);
 						stmt.setString(2, floor);
 						if (stmt.execute()) {
@@ -103,8 +105,8 @@ public class PlacesApi extends HttpServlet {
 						conn.close();
 					}
 					else {
-						String room = uri[4];
-						stmt = conn.prepareStatement("SELECT Number, Type, Description, Room.Building FROM Room LEFT JOIN Floor_Contains ON Room.Number=Floor_Contains.Room AND Room.Building=Floor_Contains.Building LEFT JOIN Building ON Floor_Contains.Building=Building.Name WHERE Building.ShortCode=? AND Floor=?" +
+						String room = uri[5];
+						stmt = conn.prepareStatement("SELECT Number, Type, Description, Room.Building FROM Room LEFT JOIN Floor_Contains ON Room.Number=Floor_Contains.Room AND Room.Building=Floor_Contains.Building LEFT JOIN Building ON Floor_Contains.Building=Building.Name WHERE Building.Name=? AND Floor=?" +
 								" AND Room.Number= ?");
 						stmt.setString(1, building);
 						stmt.setString(2, floor);
@@ -131,10 +133,10 @@ public class PlacesApi extends HttpServlet {
 					}
 				}
 				else if (requestType.equals("image")) {
-					String building = uri[2];
-					String floor = uri[3];
-					String room = uri[4];
-					stmt = conn.prepareStatement("SELECT Image FROM Room LEFT JOIN Floor_Contains ON Room.Number=Floor_Contains.Room AND Room.Building=Floor_Contains.Building LEFT JOIN Building ON Floor_Contains.Building=Building.Name WHERE Building.ShortCode=? AND Floor=?" +
+					String building = uri[3];
+					String floor = uri[4];
+					String room = uri[5];
+					stmt = conn.prepareStatement("SELECT Image FROM Room LEFT JOIN Floor_Contains ON Room.Number=Floor_Contains.Room AND Room.Building=Floor_Contains.Building LEFT JOIN Building ON Floor_Contains.Building=Building.Name WHERE Building.Name=? AND Floor=?" +
 							" AND Room.Number= ?");
 					stmt.setString(1, building);
 					stmt.setString(2, floor);
@@ -148,12 +150,14 @@ public class PlacesApi extends HttpServlet {
 							if (blob == null) {
 								//UPLOAD DUMMY IMAGE 
 								os.write(new byte[]{});
+								response.setStatus(HttpServletResponse.SC_NO_CONTENT);
 							}
 							else {
 								os.write(blob.getBytes(1, (int)blob.length()));
+								response.setStatus(HttpServletResponse.SC_OK);
 							}
 						}
-						response.setStatus(HttpServletResponse.SC_OK);
+
 						os.flush();
 					}
 					conn.close();
@@ -184,8 +188,8 @@ public class PlacesApi extends HttpServlet {
 					}
 				}
 				else if (requestType.equals("floorlist")) {
-					String building = uri[2];
-					stmt = conn.prepareStatement("SELECT Floor.Floor FROM Floor LEFT JOIN Building ON Building.Name=Floor.Building WHERE Building.ShortCode=?");
+					String building = uri[3];
+					stmt = conn.prepareStatement("SELECT Floor.Floor FROM Floor LEFT JOIN Building ON Building.Name=Floor.Building WHERE Building.Name=?");
 					stmt.setString(1, building);
 					if (stmt.execute()) {
 						ResultSet rs = stmt.getResultSet();

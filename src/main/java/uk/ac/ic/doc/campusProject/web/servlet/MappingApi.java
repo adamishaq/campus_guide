@@ -158,7 +158,7 @@ public class MappingApi extends HttpServlet {
 				}
 			*/	
 			
-				PreparedStatement stmt = conn.prepareStatement("SELECT Xpixel, Ypixel FROM Floor_Contains LEFT JOIN Building ON Floor_Contains.Building = Building.Name WHERE Building.ShortCode=? AND Floor_Contains.Floor=? AND Floor_Contains.Room=?");
+				PreparedStatement stmt = conn.prepareStatement("SELECT Xpixel, Ypixel, Building FROM Floor_Contains LEFT JOIN Building ON Floor_Contains.Building = Building.Name WHERE Building.ShortCode=? AND Floor_Contains.Floor=? AND Floor_Contains.Room=?");
 				stmt.setString(1, building);
 				stmt.setString(2, floor);
 				stmt.setString(3, location);
