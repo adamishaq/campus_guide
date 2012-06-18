@@ -1,5 +1,7 @@
 package uk.ac.ic.doc.campusProject.web.servlet;
 
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.sql.Blob;
 import java.sql.Connection;
@@ -11,7 +13,9 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.zip.Adler32;
 
+import javax.imageio.ImageIO;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -52,6 +56,41 @@ public class MappingApi extends HttpServlet {
 						response.setContentType("image/png");
 						ServletOutputStream os = response.getOutputStream();
 						os.write(image);
+						response.setStatus(HttpServletResponse.SC_OK);
+						os.flush();
+					}
+				} 
+				else {
+					response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+				}
+			}
+			else if (type.equals("check")) {
+				String building = request.getParameter("building");
+				int floor = new Integer(request.getParameter("floor"));
+	
+				PreparedStatement stmt = conn.prepareStatement("SELECT Plan FROM Floor LEFT JOIN Building ON Building=Name WHERE (Building=? OR ShortCode=?) AND Floor=?");
+				stmt.setString(1, building);
+				stmt.setString(2, building);
+				stmt.setInt(3, floor);
+				if (stmt.execute()) {
+					ResultSet rs = stmt.getResultSet();
+					while(rs.next()) {
+						Blob blob = rs.getBlob("Plan");
+						byte[] image = blob.getBytes(1, (int)blob.length());
+						
+						Adler32 check = new Adler32();
+						check.update(image);
+						BufferedImage buffImage = ImageIO.read(new ByteArrayInputStream(image));
+						int height = buffImage.getHeight();
+						int width = buffImage.getWidth();
+						
+						JSONObject json = new JSONObject();
+						json.put("width", width);
+						json.put("height", height);
+						json.put("checksum", check.getValue());
+						response.setContentType("application/json");
+						ServletOutputStream os = response.getOutputStream();
+						os.write(json.toString().getBytes());
 						response.setStatus(HttpServletResponse.SC_OK);
 						os.flush();
 					}
@@ -169,6 +208,7 @@ public class MappingApi extends HttpServlet {
 						
 						xPixel = rs.getInt("Xpixel");
 						yPixel = rs.getInt("Ypixel");
+						building = rs.getString("Building");
 					}
 					JSONObject json = new JSONObject();
 					
@@ -205,6 +245,9 @@ public class MappingApi extends HttpServlet {
 		catch (NumberFormatException e) {
 			log.error(e);
 			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 	}
 	

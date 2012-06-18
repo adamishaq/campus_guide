@@ -141,9 +141,10 @@ public class PlacesApi extends HttpServlet {
 					stmt.setString(1, building);
 					stmt.setString(2, floor);
 					stmt.setString(3, room);
+					log.info(building + "," + floor + ", " + room);
 					if (stmt.execute()) {
 						ResultSet rs = stmt.getResultSet();
-						response.setContentType("application/json");
+						response.setContentType("image/png");
 						ServletOutputStream os = response.getOutputStream();
 						while(rs.next()) {
 							Blob blob = rs.getBlob("Image");
