@@ -1,68 +1,27 @@
 body, p, li, a { font-family: arial, serif, times;font-size:13pt;}
 h1, h2, h3 { font-family: arial, serif, times; }
-body { margin:0;padding:0;}
+html, body { margin:0;padding:0;height:100%;}
+body { margin-top : 0; padding-top : 0;}
+h1 { margin-top : 0; padding-top : 0;}
+#bd {
+	background-color : #E0E0E0;
+	box-shadow: 0px 0px 10px #888;
+	width: 150px;
+	height: 100%;
+}
 #hd {
 	width : 100%;
 	height : 87px;
-	background-color : #092E67;
+	background-color : #2C7FFF;
 	margin-top : 0;
 	padding-top : 10px;
 	border-bottom : 1px solid #888;
-	z-index : 0;
+	float: left;
+	clear: both;
 }
-#ft {
-	position : absolute;
-	bottom : 0;
-	width : 100%;
-	height : 99px;
-	background-color : #6493D2;
-	border-top : 1px solid #888;
-	z-index : 0;
-}
-#logo,#bd {
-	width : 650px;
-	margin: 0 auto;
-	padding: 25px 50px 0 50px;
-}
-#logo h1 {
-	color : white;
-	font-size:36pt;
-	display: inline;
-}
-#logo img { 
-	display:inline;
-	vertical-align: bottom;
-	margin-left : 50px;
-	margin-right : 5px;
-}
-body { margin-top : 0; padding-top : 0;}
-#logo, #logo h1 { margin-top : 0; padding-top : 0;}
-#bd {
-	position : absolute;
-	top : 75px;
-	bottom : 75px;
-	left : 50%;
-	margin-left : -325px;
-	z-index : 1;
-	overflow: auto;
-	background-color : #fff;
-	-webkit-border-radius: 10px;
-	-moz-border-radius: 10px;
-	border-radius: 10px;
-	-moz-box-shadow: 0px 0px 10px #888;
-	-webkit-box-shadow: 0px 0px 10px #888;
-	box-shadow: 0px 0px 10px #888;
-}
-a, a:visited, a:hover, a:active {
-	color : #6493D2;
-}
-h2 {
-	padding : 0; margin:0;
-	font-size:36pt;
-	color:#FF5500;
-}
-h3 {
-	padding : 0; margin:0;
-	font-size:24pt;
-	color:#092E67;
+#ct {
+	background-color : #FFF8DC;
+	margin-top : 0;
+	padding-top : 10px;
+	border-bottom : 1px solid #888;
 }

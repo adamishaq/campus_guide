@@ -36,14 +36,15 @@ public class MapGeoTagParentPage extends AdminPage  {
 		initialiseGeoTagModal(daos.get(0).getBuilding());
 		initialiseMapTagModal();
 		
-		add(new Link<Void>("tagRooms") {
+		final Link<Void> tagRooms = new Link<Void>("tagRooms") {
 			private static final long serialVersionUID = 1L;
 			
 			@Override
 			public void onClick() {
-				setResponsePage(new RoomTagPage(daos, null));
+				setResponsePage(new RoomTagPage(daos, null, false));
 			}
-		});
+		};
+		add(tagRooms);
 		
 		List<String> floorList = new ArrayList<String>();
 		for (int x = 0; x < daos.size(); x++) {
@@ -63,7 +64,6 @@ public class MapGeoTagParentPage extends AdminPage  {
 				for (int x = 0; x < daos.size(); x++) {
 					final MapCoordinateTagModal tagPanel = new MapCoordinateTagModal(MapGeoTagParentPage.this.getPageReference(), mapTagModal, daos.get(x));
 					if (daos.get(x).getFloor().equals(newSelection)) {
-						log.info("Changing floor DAO");
 						mapTagModal.setPageCreator(new ModalWindow.PageCreator() {
 							private static final long serialVersionUID = 1L;
 							@Override

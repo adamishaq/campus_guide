@@ -1,5 +1,10 @@
 <wicket:extend>
+	<b>Select a floor to tag rooms of interest</b>
 	<select wicket:id="floorChoice"></select>
+	<br />
+	<b>Click on a room to input a description, upload an image or assign a category</b>
+	<br />
+	<img wicket:id="map"></img>
 	<img src="marker.png" id="marker1" style="display: none; position: absolute;" />
 	<div wicket:id="injector"></div>
 	<div wicket:id="mapPointsOverlay"></div>
@@ -13,16 +18,9 @@
 					var room = this.room;
 					var x = this.x + offset.left;
 					var y = this.y + offset.top;
-					$("div").add("<img src=\"/marker.png\" id=\"rm" + room + "\" style=\"display: none; position: absolute;\" />").appendTo(document.body).css('left', x).css('top', y).show();
+					$("ct").add("<img src=\"/marker.png\" id=\"rm" + room + "\" style=\"display: none; position: absolute;\" />").appendTo(document.body).css('left', x).css('top', y).show();
 				});
 			});
-			/*
-			$(map).mousedown(function(e) {
-				alert(e.target.nodeName);
-				$(marker1).css('left', e.pageX).css('top', e.pageY).show();
-				wicketAjaxPost(callback + '&x=' + e.pageX + '&y=' + e.pageY);
-			});
-			*/
 			$("body").mousedown(function(e) {
 				if(e.target.id == "map") {
 					var offset = $(map).offset();
@@ -39,5 +37,4 @@
 			});
 		});
 	</script>
-	<img wicket:id="map"></img>
 </wicket:extend>

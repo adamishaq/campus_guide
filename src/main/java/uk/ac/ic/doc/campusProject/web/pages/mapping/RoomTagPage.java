@@ -50,7 +50,7 @@ public class RoomTagPage extends AdminPage {
 	WebMarkupContainer mapPointOverlay;
 	NonCachingImage map;
 
-	public RoomTagPage(final List<FloorPlanDao> daos, final String floor) {
+	public RoomTagPage(final List<FloorPlanDao> daos, final String floor, final boolean visible) {
 		setPageLocation("Room Tagging");
 		add(tagModal = new ModalWindow("tagModal"));
 		tagModal.setTitle("Room Information");
@@ -60,7 +60,7 @@ public class RoomTagPage extends AdminPage {
 			@Override
 			public void onClose(AjaxRequestTarget target) {
 				log.info("callback called");
-				setResponsePage(new RoomTagPage(daos, floor));
+				setResponsePage(new RoomTagPage(daos, floor, true));
 				
 			}
 		});
@@ -74,13 +74,14 @@ public class RoomTagPage extends AdminPage {
 			
 			@Override
 			protected void onSelectionChanged(String newSelection) {
-				setResponsePage(new RoomTagPage(daos, newSelection));
+				setResponsePage(new RoomTagPage(daos, newSelection, true));
 			}
 			
 		};
 		add(floorChoice);
 		
 		map = new NonCachingImage("map");
+		map.setVisible(visible);
 		
 		DynamicImageResource mapResource = new DynamicImageResource() {
 			private static final long serialVersionUID = 1L;

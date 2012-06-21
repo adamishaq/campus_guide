@@ -2,11 +2,13 @@
     <div wicket:id="feedback"></div>
     <form wicket:id="uploadForm">
         <p>
-            Select file: <input wicket:id="fileUpload" size="40" type="file" />
+            Select file containing maps: <input wicket:id="fileUpload" size="40" type="file" />
             <input type="submit" value="Upload" />
         </p>
     </form>
     <form wicket:id="editForm">
+    		<b>Note that if you upload/update a map image with an existing </b> <br />
+    		<b>building name and floor number below, the existing map image will be updated </b>
             <table border="1">
                 <tr>
                     <td><b>Map Thumbnail</b></td>

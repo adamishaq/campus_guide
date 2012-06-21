@@ -6,7 +6,7 @@ import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.model.PropertyModel;
 
 import uk.ac.ic.doc.campusProject.web.pages.mapping.MappingLandingPage;
-import uk.ac.ic.doc.campusProject.web.panel.TopNavigationBar;
+import uk.ac.ic.doc.campusProject.web.pages.mapping.PlacesLandingPage;
 
 public abstract class AdminPage extends WebPage {
 	private static final long serialVersionUID = 1L;
@@ -15,9 +15,9 @@ public abstract class AdminPage extends WebPage {
 	public AdminPage() {
 		add(new Label("title", new PropertyModel<String>(this, "pageLocation")));
 		add(new Label("location", new PropertyModel<String>(this, "pageLocation")));
-		add(new TopNavigationBar("navBar"));
 		add(new BookmarkablePageLink<Void>("home", HomePage.class));
 		add(new BookmarkablePageLink<Void>("mapping", MappingLandingPage.class));
+		add(new BookmarkablePageLink<Void>("places", PlacesLandingPage.class));
 	}
 	
 

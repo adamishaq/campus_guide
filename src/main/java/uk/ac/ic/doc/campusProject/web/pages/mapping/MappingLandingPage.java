@@ -26,6 +26,8 @@ public class MappingLandingPage extends AdminPage {
 	public MappingLandingPage() {
 		setPageLocation("Mapping - Home");
 		add(new BookmarkablePageLink<Void>("uploadMap", MapUploadPage.class));
+		final BookmarkablePageLink<Void> editMap = new BookmarkablePageLink<Void>("editMap", MapUploadPage.class, parameters);
+		editMap.setVisible(false);
 		add(buildings = new DropDownChoice<String>("buildingSelect", new Model<String>(), populateBuildingList()) {
 			private static final long serialVersionUID = 1L;
 			
@@ -37,10 +39,11 @@ public class MappingLandingPage extends AdminPage {
 			@Override
 			protected void onSelectionChanged(String newSelection) {
 				parameters.add("building", newSelection);
+				editMap.setVisible(true);
 			}
 			
 		});
-		add(new BookmarkablePageLink<Void>("editMap", MapUploadPage.class, parameters));
+		add(editMap);
 	}
 	
 	

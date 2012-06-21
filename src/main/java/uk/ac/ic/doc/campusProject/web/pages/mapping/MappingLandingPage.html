@@ -1,7 +1,22 @@
 <wicket:extend>
-    <a href="#" wicket:id="uploadMap">Upload a new set of Floor-Plans</a>
-    <a href="#" wicket:id="editMap">Edit an existing set of Floor Plans</a>  
-    <select wicket:id="buildingSelect" />
-
-
+	<h2>Select an option</h2>
+	<table border="0">
+		<tr>
+			<td>
+				<fieldset>
+					<legend>New Maps</legend>
+					<a href="#" wicket:id="uploadMap">Upload a new map/Update an existing map</a>
+				</fieldset>
+			</td>
+			<td>
+				<fieldset>
+					<legend>Edit Existing</legend>
+					<b>Select building to edit:</b>
+			   		<select wicket:id="buildingSelect" />
+			    	<br />
+			    	<a href="#" wicket:id="editMap">Edit existing building</a>
+			    </fieldset>
+			</td>
+	   	</tr>
+	</table>
 </wicket:extend>

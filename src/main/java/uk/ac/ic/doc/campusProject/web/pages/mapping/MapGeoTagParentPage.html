@@ -1,9 +1,15 @@
 <wicket:extend>
-	<div wicket:id="geoTagModal"></div>
-	<div wicket:id="mapTagModal"></div>
-    <a wicket:id="showgeoTagModal">Tag GPS coordinates for this building</a>
-    <select wicket:id="floors" />
-    <a wicket:id="showMapTagModal">Tag corresponding floor-plan coordinates</a>
-    <br />
-    <a wicket:id="tagRooms">Next></a>
+	<fieldset>
+		<legend>Tag GPS Coordinates of Building (Optional)</legend>
+		<div wicket:id="geoTagModal"></div>
+		<div wicket:id="mapTagModal"></div>
+    	<a wicket:id="showgeoTagModal">1. Tag GPS coordinates for this building</a>
+    	<p>
+    		2. Choose a floor which contains where you clicked in Step 1:
+   			<select wicket:id="floors" /> 
+   		</p>
+    	<a wicket:id="showMapTagModal">3. Tag corresponding floor-plan coordinates</a>
+	</fieldset>
+	<br />
+    <a wicket:id="tagRooms">Continue></a>
 </wicket:extend>
