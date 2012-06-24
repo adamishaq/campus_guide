@@ -1,9 +1,54 @@
 <wicket:extend>
+	<style type="text/css">
+	#bysy_indicator {
+	  display: none;
+	  float: left;
+	  background: rgb(255,241,168);
+	  margin-top: 5px;
+	  z-index: 1000;
+	  width: 300;
+	  font-weight: bold;
+	  text-align: center;
+	  font-size: 1em;
+	}
+	</style>
+	
+	<script type="text/javascript">
+	 window.onload = setupFunc;
+	
+	 function setupFunc() {
+	   document.getElementsByTagName('body')[0].onclick = clickFunc;
+	   hideBusysign();
+	         Wicket.Ajax.registerPreCallHandler(showBusysign);
+	         Wicket.Ajax.registerPostCallHandler(hideBusysign);
+	         Wicket.Ajax.registerFailureHandler(hideBusysign);
+	 }
+	
+	 function hideBusysign() {
+	   document.getElementById('bysy_indicator').style.display ='none';
+	 }
+	
+	 function showBusysign() {
+	   document.getElementById('bysy_indicator').style.display ='inline';
+	 }
+	
+	 function clickFunc(eventData) {
+	   var clickedElement = (window.event) ? event.srcElement : eventData.target;
+	   if (clickedElement.tagName.toUpperCase() == 'BUTTON' || clickedElement.tagName.toUpperCase() == 'A' || clickedElement.parentNode.tagName.toUpperCase() == 'A'
+	     || (clickedElement.tagName.toUpperCase() == 'INPUT' && (clickedElement.type.toUpperCase() == 'BUTTON' || clickedElement.type.toUpperCase() == 'SUBMIT'))) {
+	     showBusysign();
+	   }
+	 }
+	</script>
+	
 	<fieldset>
 		<legend>Edit Places</legend>
 		<b>Select building to edit Places for:</b>
 		<select wicket:id="buildingSelect" />
     	<br />
     	<a href="#" wicket:id="editMap">Next</a>
+    	<br />
     </fieldset>
+    <br />
+    <div id="bysy_indicator">Downloading data from Server... This may take a while...</div>
 </wicket:extend>

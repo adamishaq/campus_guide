@@ -86,9 +86,9 @@ public class PlacesLandingPage extends AdminPage {
 				ResultSet rs = stmt.getResultSet();
 				while (rs.next()) {
 					try {
-						SerializableBufferedImage buffImage = new SerializableBufferedImage(ImageIO.read(rs.getBlob("Plan").getBinaryStream()));
 						int floor = rs.getInt("Floor");
 						String rsBuilding = rs.getString("Building");
+						SerializableBufferedImage buffImage = new SerializableBufferedImage(ImageIO.read(rs.getBlob("Plan").getBinaryStream()));
 						returnPlans.add(new FloorPlanDao(buffImage, rsBuilding, String.valueOf(floor)));
 					} 
 					catch (IOException e) {

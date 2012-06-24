@@ -1,4 +1,46 @@
 <wicket:extend>
+	<style type="text/css">
+	#busy_indicator {
+	  display: none;
+	  float: left;
+	  background: rgb(255,241,168);
+	  margin-top: 5px;
+	  z-index: 1000;
+	  width: 300;
+	  font-weight: bold;
+	  text-align: center;
+	  font-size: 1em;
+	}
+	</style>
+	
+	<script type="text/javascript">
+	 window.onload = setupFunc;
+	
+	 function setupFunc() {
+	   document.getElementsByTagName('body')[0].onclick = clickFunc;
+	   hideBusysign();
+	         Wicket.Ajax.registerPreCallHandler(showBusysign);
+	         Wicket.Ajax.registerPostCallHandler(hideBusysign);
+	         Wicket.Ajax.registerFailureHandler(hideBusysign);
+	 }
+	
+	 function hideBusysign() {
+	   document.getElementById('busy_indicator').style.display ='none';
+	 }
+	
+	 function showBusysign() {
+	   document.getElementById('busy_indicator').style.display ='inline';
+	 }
+	
+	 function clickFunc(eventData) {
+	   var clickedElement = (window.event) ? event.srcElement : eventData.target;
+	   if (clickedElement.tagName.toUpperCase() == 'BUTTON' || clickedElement.tagName.toUpperCase() == 'A' || clickedElement.parentNode.tagName.toUpperCase() == 'A'
+	     || (clickedElement.tagName.toUpperCase() == 'INPUT' && (clickedElement.type.toUpperCase() == 'BUTTON' || clickedElement.type.toUpperCase() == 'SUBMIT'))) {
+	     showBusysign();
+	   }
+	 }
+	</script>
+	
 	<h2>Select an option</h2>
 	<table border="0">
 		<tr>
@@ -16,7 +58,9 @@
 			    	<br />
 			    	<a href="#" wicket:id="editMap">Edit existing building</a>
 			    </fieldset>
+			    <br />
 			</td>
 	   	</tr>
 	</table>
+	<div id="busy_indicator">Downloading data from Server... This may take a while...</div>
 </wicket:extend>

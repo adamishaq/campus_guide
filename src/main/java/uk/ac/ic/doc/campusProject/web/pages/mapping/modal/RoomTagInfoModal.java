@@ -2,6 +2,7 @@ package uk.ac.ic.doc.campusProject.web.pages.mapping.modal;
 
 import java.awt.Point;
 import java.io.IOException;
+import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -25,6 +26,7 @@ import org.apache.wicket.markup.html.form.upload.FileUploadField;
 import org.apache.wicket.markup.html.image.NonCachingImage;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.resource.DynamicImageResource;
+import org.apache.wicket.util.io.IOUtils;
 
 import uk.ac.ic.doc.campusProject.model.FloorPlanDao;
 import uk.ac.ic.doc.campusProject.model.RoomDetailsDao;
@@ -148,19 +150,29 @@ public class RoomTagInfoModal extends WebPage {
 		});
 		tagInfoForm.add(fileUpload = new FileUploadField("fileUpload"));
 		
-		tagInfoForm.add(new NonCachingImage("preview", new DynamicImageResource() {
+		final NonCachingImage image = new NonCachingImage("preview", new DynamicImageResource() {
 			private static final long serialVersionUID = 1L;
 
 			@Override
 			protected byte[] getImageData(Attributes attributes) {
 				if (roomDetails.getImage() != null) {
+					setVisible(true);
 					return roomDetails.getImage().getThumb();
 				}
 				else {
-					return new byte[]{' '};
+					InputStream fis = RoomTagInfoModal.class.getResourceAsStream("/noimage.png");
+					try {
+						return IOUtils.toByteArray(fis);
+					} 
+					catch (IOException e) {
+						e.printStackTrace();
+						return new byte[]{' '};
+					}
 				}
 			}
-		}));
+		});
+		
+		tagInfoForm.add(image);
 		
 		tagInfoForm.add(new AjaxButton("delete") {
 			private static final long serialVersionUID = 1L;

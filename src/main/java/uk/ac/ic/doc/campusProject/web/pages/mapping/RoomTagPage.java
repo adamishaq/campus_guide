@@ -83,6 +83,7 @@ public class RoomTagPage extends AdminPage {
 		map = new NonCachingImage("map");
 		map.setVisible(visible);
 		
+		
 		DynamicImageResource mapResource = new DynamicImageResource() {
 			private static final long serialVersionUID = 1L;
 
